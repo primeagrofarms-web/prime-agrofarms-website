@@ -20,6 +20,7 @@ import {
   Search,
   Heart,
   MessageCircle,
+  BookOpen,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -33,6 +34,7 @@ const supabase = createClient(
 const sidebarItems = [
   { icon: LayoutDashboard, label: "Dashboard", href: "/admin" },
   { icon: Newspaper, label: "News", href: "/admin/news", active: true },
+  { icon: BookOpen, label: "Blog", href: "/admin/blog" },
   { icon: Image, label: "Gallery", href: "/admin/gallery" },
   { icon: MessageSquare, label: "Comments", href: "/admin/comments" },
   { icon: Mail, label: "Messages", href: "/admin/messages" },

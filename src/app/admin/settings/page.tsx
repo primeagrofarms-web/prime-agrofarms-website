@@ -13,11 +13,13 @@ import {
   LogOut,
   Menu,
   X,
+  BookOpen,
 } from "lucide-react";
 
 const sidebarItems = [
   { icon: LayoutDashboard, label: "Dashboard", href: "/admin" },
   { icon: Newspaper, label: "News", href: "/admin/news" },
+  { icon: BookOpen, label: "Blog", href: "/admin/blog" },
   { icon: Image, label: "Gallery", href: "/admin/gallery" },
   { icon: MessageSquare, label: "Comments", href: "/admin/comments" },
   { icon: Mail, label: "Messages", href: "/admin/messages" },
