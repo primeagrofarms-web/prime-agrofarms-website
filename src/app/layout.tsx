@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { VisualEditsMessenger } from "orchids-visual-edits";
-import { Header } from "@/components/Header";
-import { Footer } from "@/components/Footer";
+import { SiteLayout } from "@/components/SiteLayout";
 
 export const metadata: Metadata = {
   title: "Prime Agro Farm - Uganda's Leading Integrated Dairy Company",
@@ -34,9 +33,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="antialiased">
-        <Header />
-        <main>{children}</main>
-        <Footer />
+        <SiteLayout>{children}</SiteLayout>
         <VisualEditsMessenger />
       </body>
     </html>

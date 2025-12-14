@@ -6,11 +6,9 @@ export default function AdminLoginLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body className="antialiased">
-        {children}
-        <VisualEditsMessenger />
-      </body>
-    </html>
+    <>
+      {children}
+      <VisualEditsMessenger />
+    </>
   );
 }
