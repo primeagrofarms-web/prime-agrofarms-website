@@ -1,8 +1,14 @@
 import type { NextConfig } from "next";
 import path from "node:path";
 
-// Loader path from orchids-visual-edits - use direct resolve to get the actual file
-const loaderPath = require.resolve('orchids-visual-edits/loader.js');
+// Cache the loader path to prevent repeated restarts
+const LOADER_PATH = (() => {
+  try {
+    return require.resolve('orchids-visual-edits/loader.js');
+  } catch {
+    return '';
+  }
+})();
 
 const nextConfig: NextConfig = {
   images: {
@@ -24,13 +30,15 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
-  turbopack: {
-    rules: {
-      "*.{jsx,tsx}": {
-        loaders: [loaderPath]
+  ...(LOADER_PATH ? {
+    turbopack: {
+      rules: {
+        "*.{jsx,tsx}": {
+          loaders: [LOADER_PATH]
+        }
       }
     }
-  }
+  } : {})
 } as NextConfig;
 
 export default nextConfig;
