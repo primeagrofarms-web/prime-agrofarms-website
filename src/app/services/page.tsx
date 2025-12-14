@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
-import { Milk, Sprout, GraduationCap, CheckCircle, ArrowRight, ChevronRight, Settings, Users, Award, Clock, Target, Zap } from "lucide-react";
+import { Milk, Sprout, GraduationCap, CheckCircle, ArrowRight, ChevronRight, Settings, Users, Award, Clock, Target, Zap, Heart, TreePine } from "lucide-react";
 
 const services = [
   {
@@ -67,6 +67,48 @@ const services = [
       { value: "1000+", label: "Farmers Trained" },
       { value: "12+", label: "Programs" },
       { value: "98%", label: "Success Rate" },
+    ],
+  },
+  {
+    id: "cattle-breeding",
+    icon: Heart,
+    title: "Cattle Breeding",
+    subtitle: "Superior Genetics & Livestock Excellence",
+    description: "Our cattle breeding program focuses on producing high-quality livestock with superior genetics. We employ modern breeding techniques and maintain rigorous health standards to ensure strong, productive cattle for dairy and beef production.",
+    image: "https://images.unsplash.com/photo-1560493676-04071c5f467b?w=800",
+    features: [
+      "Selective breeding for superior genetics",
+      "Artificial insemination services",
+      "Comprehensive health monitoring",
+      "Breeding record management",
+      "Consultation and advisory services",
+      "Sale of breeding stock",
+    ],
+    stats: [
+      { value: "200+", label: "Breeding Stock" },
+      { value: "90%", label: "Success Rate" },
+      { value: "15+", label: "Elite Bulls" },
+    ],
+  },
+  {
+    id: "agro-tourism",
+    icon: TreePine,
+    title: "Agro Tourism",
+    subtitle: "Experience Farm Life",
+    description: "Discover the beauty of sustainable farming through our agro-tourism experiences. From guided farm tours to hands-on agricultural activities, we offer visitors an authentic glimpse into modern farming practices and rural life.",
+    image: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=800",
+    features: [
+      "Guided farm tours and experiences",
+      "Interactive farming activities",
+      "Educational programs for schools",
+      "Farm-to-table dining experiences",
+      "Photography and event hosting",
+      "Seasonal harvest participation",
+    ],
+    stats: [
+      { value: "5000+", label: "Visitors Yearly" },
+      { value: "20+", label: "Acres to Explore" },
+      { value: "4.9", label: "Star Rating" },
     ],
   },
 ];
