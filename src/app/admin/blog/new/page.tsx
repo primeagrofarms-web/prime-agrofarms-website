@@ -119,14 +119,14 @@ export default function NewBlogPage() {
         imageUrl = data.publicUrl;
       }
 
-      const { error: insertError } = await supabase.from("blogs").insert([
-        {
-          ...formData,
-          image_url: imageUrl,
-        },
-      ]);
+      // Call API to create blog and send emails
+      const res = await fetch('/api/blog', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...formData, image_url: imageUrl }),
+      });
 
-      if (insertError) throw insertError;
+      if (!res.ok) throw new Error('Failed to create blog');
 
       alert("Blog post created successfully!");
       router.push("/admin/blog");

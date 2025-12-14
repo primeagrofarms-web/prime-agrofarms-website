@@ -118,15 +118,14 @@ export default function NewNewsPage() {
         imageUrl = data.publicUrl;
       }
 
-      // Insert news article
-      const { error: insertError } = await supabase.from("news").insert([
-        {
-          ...formData,
-          image_url: imageUrl,
-        },
-      ]);
+      // Call API to create news and send emails
+      const res = await fetch('/api/news', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...formData, image_url: imageUrl }),
+      });
 
-      if (insertError) throw insertError;
+      if (!res.ok) throw new Error('Failed to create news');
 
       alert("News article created successfully!");
       router.push("/admin/news");
