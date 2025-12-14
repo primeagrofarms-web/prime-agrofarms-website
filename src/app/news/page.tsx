@@ -1,92 +1,55 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
 import { ChevronRight, Search, Calendar, Eye, ArrowRight } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { supabase } from "@/lib/supabase";
 
-const newsArticles = [
-  {
-    id: 1,
-    title: "Prime Agro Farm Wins Uganda's Best Farmer 2025",
-    slug: "best-farmer-2025",
-    excerpt: "Sebastian Rutah Ngambwa recognized for outstanding contributions to agricultural excellence and innovation in dairy farming.",
-    content: "Full article content here...",
-    image: "https://images.unsplash.com/photo-1500595046743-cd271d694d30?w=800",
-    date: "2025-01-15",
-    views: 3456,
-    category: "Awards",
-  },
-  {
-    id: 2,
-    title: "New Automated Milking System Installation Complete",
-    slug: "new-milking-system",
-    excerpt: "Modernizing our dairy operations with cutting-edge robotic milking technology for improved efficiency and animal welfare.",
-    content: "Full article content here...",
-    image: "https://images.unsplash.com/photo-1594771804886-a933bb2d609b?w=800",
-    date: "2024-12-01",
-    views: 2189,
-    category: "Technology",
-  },
-  {
-    id: 3,
-    title: "Community Training Program Reaches 1000 Farmers",
-    slug: "community-training-milestone",
-    excerpt: "A milestone achievement in our commitment to empowering local farmers with modern agricultural techniques.",
-    content: "Full article content here...",
-    image: "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=800",
-    date: "2024-11-15",
-    views: 1876,
-    category: "Community",
-  },
-  {
-    id: 4,
-    title: "Expanding Our Silage Production Capacity",
-    slug: "silage-expansion",
-    excerpt: "New storage facilities and equipment to meet growing demand for quality animal feed in the region.",
-    content: "Full article content here...",
-    image: "https://images.unsplash.com/photo-1500076656116-558758c991c1?w=800",
-    date: "2024-10-20",
-    views: 1234,
-    category: "Operations",
-  },
-  {
-    id: 5,
-    title: "Partnership with Agricultural Research Institute",
-    slug: "research-partnership",
-    excerpt: "Collaborating with leading researchers to advance sustainable farming practices in East Africa.",
-    content: "Full article content here...",
-    image: "https://images.unsplash.com/photo-1574943320219-553eb213f72d?w=800",
-    date: "2024-09-05",
-    views: 987,
-    category: "Partnerships",
-  },
-  {
-    id: 6,
-    title: "Youth Agriculture Program Launch",
-    slug: "youth-program-launch",
-    excerpt: "Introducing young people to modern farming careers through our new internship and mentorship program.",
-    content: "Full article content here...",
-    image: "https://images.unsplash.com/photo-1464226184884-fa280b87c399?w=800",
-    date: "2024-08-10",
-    views: 1567,
-    category: "Education",
-  },
-];
+interface NewsArticle {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt: string;
+  image_url: string;
+  published_date: string;
+}
 
-const categories = ["All", "Awards", "Technology", "Community", "Operations", "Partnerships", "Education"];
+const categories = ["All"];
 
 export default function NewsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
+  const [newsArticles, setNewsArticles] = useState<NewsArticle[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchNews();
+  }, []);
+
+  const fetchNews = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("news")
+        .select("id, title, slug, excerpt, image_url, published_date")
+        .order("published_date", { ascending: false });
+
+      if (error) throw error;
+      setNewsArticles(data || []);
+    } catch (error) {
+      console.error("Error fetching news:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const filteredNews = newsArticles.filter((article) => {
     const matchesSearch = article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       article.excerpt.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = activeCategory === "All" || article.category === activeCategory;
+    const matchesCategory = activeCategory === "All";
     return matchesSearch && matchesCategory;
   });
 
@@ -132,107 +95,71 @@ export default function NewsPage() {
                     className="pl-10"
                   />
                 </div>
-                <div className="flex flex-wrap gap-2">
-                  {categories.map((category) => (
-                    <Button
-                      key={category}
-                      variant={activeCategory === category ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => setActiveCategory(category)}
-                      className={activeCategory === category ? "bg-primary-green hover:bg-secondary-green" : ""}
-                    >
-                      {category}
-                    </Button>
-                  ))}
+              </div>
+
+              {loading ? (
+                <div className="text-center py-16 bg-white rounded-xl">
+                  <p className="text-muted-foreground text-lg">Loading news...</p>
                 </div>
-              </div>
-
-              <div className="space-y-8">
-                {filteredNews.map((article, index) => (
-                  <motion.article
-                    key={article.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: index * 0.1 }}
-                    className="bg-white rounded-xl overflow-hidden shadow-lg border border-border card-hover"
-                  >
-                    <div className="grid md:grid-cols-3 gap-0">
-                      <div className="relative aspect-[16/10] md:aspect-auto">
-                        <Image
-                          src={article.image}
-                          alt={article.title}
-                          fill
-                          className="object-cover"
-                        />
-                      </div>
-                      <div className="md:col-span-2 p-6">
-                        <div className="flex items-center gap-4 mb-3">
-                          <span className="text-xs font-medium px-3 py-1 bg-primary-green/10 text-primary-green rounded-full">
-                            {article.category}
-                          </span>
-                          <span className="flex items-center gap-1 text-sm text-muted-foreground">
-                            <Calendar className="w-4 h-4" />
-                            {new Date(article.date).toLocaleDateString("en-US", {
-                              month: "long",
-                              day: "numeric",
-                              year: "numeric",
-                            })}
-                          </span>
-                          <span className="flex items-center gap-1 text-sm text-muted-foreground">
-                            <Eye className="w-4 h-4" />
-                            {article.views}
-                          </span>
-                        </div>
-                        <h2 className="text-xl font-bold text-foreground mb-2 line-clamp-2">
-                          {article.title}
-                        </h2>
-                        <p className="text-muted-foreground mb-4 line-clamp-2">
-                          {article.excerpt}
-                        </p>
-                        <Link
-                          href={`/news/${article.slug}`}
-                          className="inline-flex items-center text-primary-green font-semibold hover:gap-3 transition-all gap-2"
-                        >
-                          Read More
-                          <ArrowRight className="w-5 h-5" />
-                        </Link>
-                      </div>
-                    </div>
-                  </motion.article>
-                ))}
-              </div>
-
-              {filteredNews.length === 0 && (
+              ) : filteredNews.length === 0 ? (
                 <div className="text-center py-16 bg-white rounded-xl">
                   <p className="text-muted-foreground text-lg">No news articles found matching your criteria.</p>
+                </div>
+              ) : (
+                <div className="space-y-8">
+                  {filteredNews.map((article, index) => (
+                    <motion.article
+                      key={article.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: index * 0.1 }}
+                      className="bg-white rounded-xl overflow-hidden shadow-lg border border-border card-hover"
+                    >
+                      <div className="grid md:grid-cols-3 gap-0">
+                        <div className="relative aspect-[16/10] md:aspect-auto">
+                          <Image
+                            src={article.image_url}
+                            alt={article.title}
+                            fill
+                            className="object-cover"
+                          />
+                        </div>
+                        <div className="md:col-span-2 p-6">
+                          <div className="flex items-center gap-4 mb-3">
+                            <span className="flex items-center gap-1 text-sm text-muted-foreground">
+                              <Calendar className="w-4 h-4" />
+                              {new Date(article.published_date).toLocaleDateString("en-US", {
+                                month: "long",
+                                day: "numeric",
+                                year: "numeric",
+                              })}
+                            </span>
+                          </div>
+                          <h2 className="text-xl font-bold text-foreground mb-2 line-clamp-2">
+                            {article.title}
+                          </h2>
+                          <p className="text-muted-foreground mb-4 line-clamp-2">
+                            {article.excerpt}
+                          </p>
+                          <Link
+                            href={`/news/${article.slug}`}
+                            className="inline-flex items-center text-primary-green font-semibold hover:gap-3 transition-all gap-2"
+                          >
+                            Read More
+                            <ArrowRight className="w-5 h-5" />
+                          </Link>
+                        </div>
+                      </div>
+                    </motion.article>
+                  ))}
                 </div>
               )}
             </div>
 
             <aside className="lg:w-1/4 space-y-8">
               <div className="bg-white rounded-xl p-6 shadow-lg border border-border">
-                <h3 className="text-lg font-bold text-foreground mb-4">Categories</h3>
-                <ul className="space-y-2">
-                  {categories.slice(1).map((category) => (
-                    <li key={category}>
-                      <button
-                        onClick={() => setActiveCategory(category)}
-                        className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${
-                          activeCategory === category
-                            ? "bg-primary-green text-white"
-                            : "hover:bg-secondary text-muted-foreground"
-                        }`}
-                      >
-                        {category}
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <div className="bg-white rounded-xl p-6 shadow-lg border border-border">
-                <h3 className="text-lg font-bold text-foreground mb-4">Popular Articles</h3>
+                <h3 className="text-lg font-bold text-foreground mb-4">Recent Articles</h3>
                 <ul className="space-y-4">
                   {newsArticles.slice(0, 3).map((article) => (
                     <li key={article.id}>
@@ -242,7 +169,7 @@ export default function NewsPage() {
                       >
                         <div className="relative w-16 h-16 rounded-lg overflow-hidden flex-shrink-0">
                           <Image
-                            src={article.image}
+                            src={article.image_url}
                             alt={article.title}
                             fill
                             className="object-cover"
@@ -253,7 +180,7 @@ export default function NewsPage() {
                             {article.title}
                           </h4>
                           <p className="text-xs text-muted-foreground mt-1">
-                            {article.views} views
+                            {new Date(article.published_date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
                           </p>
                         </div>
                       </Link>
