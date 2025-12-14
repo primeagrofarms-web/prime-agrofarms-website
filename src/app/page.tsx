@@ -1,10 +1,29 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight, Milk, Sprout, GraduationCap, Award, Users, MapPin, TrendingUp, Play, ChevronRight } from "lucide-react";
 import { useEffect, useState, useRef } from "react";
+
+const heroImages = [
+  {
+    src: "https://images.unsplash.com/photo-1500595046743-cd271d694d30?w=800",
+    alt: "Prime Agro Farm dairy cattle grazing",
+  },
+  {
+    src: "https://images.unsplash.com/photo-1594771804886-a933bb2d609b?w=800",
+    alt: "Modern dairy farming technology",
+  },
+  {
+    src: "https://images.unsplash.com/photo-1500076656116-558758c991c1?w=800",
+    alt: "Sustainable agricultural practices",
+  },
+  {
+    src: "https://images.unsplash.com/photo-1560493676-04071c5f467b?w=800",
+    alt: "Farm training and education",
+  },
+];
 
 const stats = [
   { icon: Milk, value: 500, suffix: "+", label: "Dairy Cattle" },
@@ -99,6 +118,106 @@ function CountUp({ end, duration = 2000 }: { end: number; duration?: number }) {
   return <span ref={countRef}>{count}</span>;
 }
 
+function CardThrowCarousel() {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [progress, setProgress] = useState(0);
+  const DURATION = 5000;
+
+  useEffect(() => {
+    const startTime = Date.now();
+    
+    const progressInterval = setInterval(() => {
+      const elapsed = Date.now() - startTime;
+      const currentProgress = Math.min((elapsed / DURATION) * 100, 100);
+      setProgress(currentProgress);
+    }, 16);
+
+    const slideTimer = setTimeout(() => {
+      setCurrentIndex((prev) => (prev + 1) % heroImages.length);
+      setProgress(0);
+    }, DURATION);
+
+    return () => {
+      clearInterval(progressInterval);
+      clearTimeout(slideTimer);
+    };
+  }, [currentIndex]);
+
+  return (
+    <div className="relative aspect-[4/3] rounded-2xl overflow-hidden">
+      <AnimatePresence mode="popLayout">
+        {heroImages.map((image, index) => {
+          const isActive = index === currentIndex;
+          const isPrev = index === (currentIndex - 1 + heroImages.length) % heroImages.length;
+          
+          if (!isActive && !isPrev) return null;
+
+          return (
+            <motion.div
+              key={index}
+              initial={isActive ? { 
+                x: 100, 
+                y: -100, 
+                rotate: 15, 
+                scale: 0.8, 
+                opacity: 0,
+                zIndex: 20 
+              } : false}
+              animate={isActive ? { 
+                x: 0, 
+                y: 0, 
+                rotate: 0, 
+                scale: 1, 
+                opacity: 1,
+                zIndex: 20 
+              } : {
+                x: -50,
+                y: 50,
+                rotate: -8,
+                scale: 0.9,
+                opacity: 0.3,
+                zIndex: 10
+              }}
+              exit={{ 
+                x: -100, 
+                y: 100, 
+                rotate: -15, 
+                scale: 0.8, 
+                opacity: 0,
+                zIndex: 5
+              }}
+              transition={{ 
+                duration: 0.7, 
+                ease: [0.32, 0.72, 0, 1] 
+              }}
+              className="absolute inset-0"
+            >
+              <div className="relative w-full h-full rounded-2xl overflow-hidden shadow-2xl">
+                <Image
+                  src={image.src}
+                  alt={image.alt}
+                  fill
+                  className="object-cover"
+                  priority={index === 0}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
+              </div>
+            </motion.div>
+          );
+        })}
+      </AnimatePresence>
+
+      <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/20 z-30">
+        <motion.div
+          className="h-full bg-gradient-to-r from-mint-green to-accent-green"
+          style={{ width: `${progress}%` }}
+          transition={{ duration: 0.016 }}
+        />
+      </div>
+    </div>
+  );
+}
+
 export default function HomePage() {
   return (
     <>
@@ -150,22 +269,13 @@ export default function HomePage() {
               transition={{ duration: 0.8, delay: 0.2 }}
               className="relative"
             >
-              <div className="relative aspect-[4/3] rounded-2xl overflow-hidden shadow-2xl">
-                <Image
-                  src="https://images.unsplash.com/photo-1500595046743-cd271d694d30?w=800"
-                  alt="Prime Agro Farm dairy cattle grazing"
-                  fill
-                  className="object-cover"
-                  priority
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
-              </div>
+              <CardThrowCarousel />
 
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.6 }}
-                className="absolute -bottom-6 -left-6 bg-white rounded-xl p-4 shadow-xl"
+                className="absolute -bottom-6 -left-6 bg-white rounded-xl p-4 shadow-xl z-40"
               >
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 rounded-full bg-primary-green/10 flex items-center justify-center">
@@ -182,7 +292,7 @@ export default function HomePage() {
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.8 }}
-                className="absolute -top-6 -right-6 bg-white rounded-xl p-4 shadow-xl"
+                className="absolute -top-6 -right-6 bg-white rounded-xl p-4 shadow-xl z-40"
               >
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 rounded-full bg-accent-green/10 flex items-center justify-center">
