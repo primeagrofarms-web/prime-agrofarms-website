@@ -30,6 +30,7 @@ const sidebarItems = [
   { icon: Image, label: "Gallery", href: "/admin/gallery" },
   { icon: MessageSquare, label: "Comments", href: "/admin/comments" },
   { icon: Mail, label: "Messages", href: "/admin/messages" },
+  { icon: UserPlus, label: "Subscribers", href: "/admin/subscribers" },
   { icon: Users, label: "Leadership", href: "/admin/leadership" },
   { icon: Settings, label: "Settings", href: "/admin/settings" },
 ];
