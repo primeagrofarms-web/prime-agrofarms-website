@@ -62,10 +62,11 @@ export default function AdminDashboard() {
       const oneMonthAgo = new Date();
       oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
 
-      const [newsResult, galleryResult, subscribersResult] = await Promise.all([
+      const [newsResult, galleryResult, subscribersResult, messagesResult] = await Promise.all([
         supabase.from("news").select("id, created_at", { count: "exact" }),
         supabase.from("gallery").select("id, created_at", { count: "exact" }),
         supabase.from("newsletter_subscribers").select("id, created_at", { count: "exact" }),
+        supabase.from("messages").select("id, status", { count: "exact" }),
       ]);
 
       const totalNews = newsResult.count || 0;
@@ -81,6 +82,11 @@ export default function AdminDashboard() {
       const totalSubscribers = subscribersResult.count || 0;
       const subscribersThisMonth = subscribersResult.data?.filter(
         (item) => new Date(item.created_at) >= oneMonthAgo
+      ).length || 0;
+
+      const totalMessages = messagesResult.count || 0;
+      const unreadMessages = messagesResult.data?.filter(
+        (msg) => msg.status === "unread"
       ).length || 0;
 
       setStats([
@@ -100,8 +106,8 @@ export default function AdminDashboard() {
         },
         {
           label: "Messages",
-          value: "0",
-          change: "0 unread",
+          value: totalMessages.toString(),
+          change: `${unreadMessages} unread`,
           icon: Mail,
           color: "bg-orange-500",
         },
