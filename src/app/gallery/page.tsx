@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
 import { ChevronRight, X, ChevronLeft, ChevronRight as ChevronRightIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { supabase } from "@/lib/supabase";
 
 const categories = [
   { id: "all", label: "All Photos" },
@@ -15,76 +16,39 @@ const categories = [
   { id: "production", label: "Production" },
 ];
 
-const galleryImages = [
-  { 
-    id: 1, 
-    title: "Agro Tourism", 
-    description: "Experience farm life through our agro-tourism program",
-    category: "facilities", 
-    image: "/images/gallery/Agro-Tourism.jpg"
-  },
-  { 
-    id: 2, 
-    title: "Cattle Breeding Program", 
-    description: "Our premium cattle breeding facility with modern genetics",
-    category: "livestock", 
-    image: "/images/gallery/Cattle Breeding.jpg"
-  },
-  { 
-    id: 3, 
-    title: "Cattle Breeding Excellence", 
-    description: "Advanced breeding techniques for superior dairy cattle",
-    category: "livestock", 
-    image: "/images/gallery/Cattle Breeding 1.jpg"
-  },
-  { 
-    id: 4, 
-    title: "Breeding Operations", 
-    description: "State-of-the-art breeding facilities and practices",
-    category: "livestock", 
-    image: "/images/gallery/Cattle Breeding 2.jpg"
-  },
-  { 
-    id: 5, 
-    title: "Healthy Cattle", 
-    description: "Well-maintained dairy cattle in optimal conditions",
-    category: "livestock", 
-    image: "/images/gallery/cattle.jpg"
-  },
-  { 
-    id: 6, 
-    title: "Dairy Cattle", 
-    description: "High-quality dairy cattle producing premium milk",
-    category: "livestock", 
-    image: "/images/gallery/Dairy cattle.jpg"
-  },
-  { 
-    id: 7, 
-    title: "Milk Production Facility", 
-    description: "Modern automated milking parlor with latest technology",
-    category: "production", 
-    image: "/images/gallery/Milk-Production-2-scaled.jpg"
-  },
-  { 
-    id: 8, 
-    title: "Nakitooma Ranch Aerial View", 
-    description: "Panoramic view of our expansive farming operations",
-    category: "landscape", 
-    image: "/images/gallery/Nakitooma-Ranch-drone image.jpg"
-  },
-  { 
-    id: 9, 
-    title: "Silage & Hay Production", 
-    description: "Quality feed production for year-round livestock nutrition",
-    category: "production", 
-    image: "/images/gallery/Silage-Hay-Production-1-scaled.jpg"
-  },
-];
+interface GalleryImage {
+  id: string;
+  title: string;
+  description: string;
+  category: string;
+  image_url: string;
+}
 
 export default function GalleryPage() {
   const [activeCategory, setActiveCategory] = useState("all");
-  const [selectedImage, setSelectedImage] = useState<typeof galleryImages[0] | null>(null);
-  const [viewMode, setViewMode] = useState<"grid" | "masonry">("grid");
+  const [selectedImage, setSelectedImage] = useState<GalleryImage | null>(null);
+  const [galleryImages, setGalleryImages] = useState<GalleryImage[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchGallery();
+  }, []);
+
+  const fetchGallery = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("gallery")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      setGalleryImages(data || []);
+    } catch (error) {
+      console.error("Error fetching gallery:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const filteredImages = activeCategory === "all"
     ? galleryImages
@@ -150,45 +114,49 @@ export default function GalleryPage() {
             </div>
           </div>
 
-          <motion.div
-            layout
-            className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
-          >
-            <AnimatePresence mode="popLayout">
-              {filteredImages.map((image, index) => (
-                <motion.div
-                  key={image.id}
-                  layout
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.9 }}
-                  whileHover={{ y: -8, transition: { duration: 0.3 } }}
-                  transition={{ delay: index * 0.05 }}
-                  className="group relative overflow-hidden rounded-xl shadow-lg cursor-pointer hover:shadow-2xl transition-all duration-300"
-                  onClick={() => setSelectedImage(image)}
-                >
-                  <div className="relative aspect-square">
-                    <Image
-                      src={image.image}
-                      alt={image.title}
-                      fill
-                      className="object-cover transition-transform duration-500 group-hover:scale-110"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                    <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
-                      <h3 className="text-white font-bold mb-1">{image.title}</h3>
-                      <p className="text-white/80 text-sm line-clamp-2">{image.description}</p>
-                    </div>
-                  </div>
-                </motion.div>
-              ))}
-            </AnimatePresence>
-          </motion.div>
-
-          {filteredImages.length === 0 && (
+          {loading ? (
+            <div className="text-center py-16">
+              <p className="text-muted-foreground text-lg">Loading gallery...</p>
+            </div>
+          ) : filteredImages.length === 0 ? (
             <div className="text-center py-16">
               <p className="text-muted-foreground text-lg">No images found in this category.</p>
             </div>
+          ) : (
+            <motion.div
+              layout
+              className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+            >
+              <AnimatePresence mode="popLayout">
+                {filteredImages.map((image, index) => (
+                  <motion.div
+                    key={image.id}
+                    layout
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.9 }}
+                    whileHover={{ y: -8, transition: { duration: 0.3 } }}
+                    transition={{ delay: index * 0.05 }}
+                    className="group relative overflow-hidden rounded-xl shadow-lg cursor-pointer hover:shadow-2xl transition-all duration-300"
+                    onClick={() => setSelectedImage(image)}
+                  >
+                    <div className="relative aspect-square">
+                      <Image
+                        src={image.image_url}
+                        alt={image.title}
+                        fill
+                        className="object-cover transition-transform duration-500 group-hover:scale-110"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                      <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+                        <h3 className="text-white font-bold mb-1">{image.title}</h3>
+                        <p className="text-white/80 text-sm line-clamp-2">{image.description}</p>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </motion.div>
           )}
         </div>
       </section>
@@ -241,7 +209,7 @@ export default function GalleryPage() {
               onClick={(e) => e.stopPropagation()}
             >
               <Image
-                src={selectedImage.image}
+                src={selectedImage.image_url}
                 alt={selectedImage.title}
                 width={1200}
                 height={800}

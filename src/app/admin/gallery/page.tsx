@@ -2,12 +2,12 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { motion } from "framer-motion";
-import NextImage from "next/image";
 import {
   LayoutDashboard,
   Newspaper,
-  Image,
+  Image as ImageIcon,
   MessageSquare,
   Users,
   Mail,
@@ -16,12 +16,12 @@ import {
   Menu,
   X,
   Plus,
+  Edit,
   Trash2,
   Search,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { createClient } from "@supabase/supabase-js";
 
 const supabase = createClient(
@@ -32,95 +32,83 @@ const supabase = createClient(
 const sidebarItems = [
   { icon: LayoutDashboard, label: "Dashboard", href: "/admin" },
   { icon: Newspaper, label: "News", href: "/admin/news" },
-  { icon: Image, label: "Gallery", href: "/admin/gallery", active: true },
+  { icon: ImageIcon, label: "Gallery", href: "/admin/gallery", active: true },
   { icon: MessageSquare, label: "Comments", href: "/admin/comments" },
   { icon: Mail, label: "Messages", href: "/admin/messages" },
   { icon: Users, label: "Leadership", href: "/admin/leadership" },
   { icon: Settings, label: "Settings", href: "/admin/settings" },
 ];
 
-interface GalleryImage {
+const categories = [
+  { id: "all", label: "All" },
+  { id: "livestock", label: "Livestock" },
+  { id: "facilities", label: "Facilities" },
+  { id: "landscape", label: "Landscape" },
+  { id: "production", label: "Production" },
+];
+
+interface GalleryItem {
   id: string;
   title: string;
-  url: string;
+  description: string;
   category: string;
-  alt_text: string | null;
+  image_url: string;
   created_at: string;
 }
 
 export default function GalleryManagement() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [images, setImages] = useState<GalleryImage[]>([]);
+  const [gallery, setGallery] = useState<GalleryItem[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [filterCategory, setFilterCategory] = useState("all");
   const [loading, setLoading] = useState(true);
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [formData, setFormData] = useState({
-    title: "",
-    url: "",
-    category: "",
-    alt_text: "",
-  });
 
   useEffect(() => {
-    fetchImages();
+    fetchGallery();
   }, []);
 
-  const fetchImages = async () => {
+  const fetchGallery = async () => {
     try {
       const { data, error } = await supabase
-        .from("images")
+        .from("gallery")
         .select("*")
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      setImages(data || []);
+      setGallery(data || []);
     } catch (error) {
-      console.error("Error fetching images:", error);
+      console.error("Error fetching gallery:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-
-    try {
-      const { error } = await supabase.from("images").insert([formData]);
-
-      if (error) throw error;
-
-      alert("Image added successfully!");
-      setShowAddModal(false);
-      setFormData({ title: "", url: "", category: "", alt_text: "" });
-      fetchImages();
-    } catch (error) {
-      console.error("Error adding image:", error);
-      alert("Failed to add image");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (id: string, imageUrl: string) => {
     if (!confirm("Are you sure you want to delete this image?")) return;
 
     try {
-      const { error } = await supabase.from("images").delete().eq("id", id);
+      const imagePath = imageUrl.split("/").pop();
+      if (imagePath) {
+        await supabase.storage.from("gallery-images").remove([imagePath]);
+      }
+
+      const { error } = await supabase.from("gallery").delete().eq("id", id);
 
       if (error) throw error;
-      setImages(images.filter((item) => item.id !== id));
+      setGallery(gallery.filter((item) => item.id !== id));
     } catch (error) {
-      console.error("Error deleting image:", error);
-      alert("Failed to delete image");
+      console.error("Error deleting gallery item:", error);
+      alert("Failed to delete gallery item");
     }
   };
 
-  const filteredImages = images.filter(
-    (item) =>
+  const filteredGallery = gallery.filter((item) => {
+    const matchesSearch =
       item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.category.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+      item.description.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory = filterCategory === "all" || item.category === filterCategory;
+    return matchesSearch && matchesCategory;
+  });
 
   return (
     <div className="flex min-h-screen">
@@ -188,72 +176,106 @@ export default function GalleryManagement() {
               <h1 className="text-xl font-bold text-foreground">Gallery Management</h1>
             </div>
 
-            <Button className="btn-primary" onClick={() => setShowAddModal(true)}>
-              <Plus className="w-4 h-4 mr-2" />
-              Add Image
-            </Button>
+            <Link href="/admin/gallery/new">
+              <Button className="btn-primary">
+                <Plus className="w-4 h-4 mr-2" />
+                Add Image
+              </Button>
+            </Link>
           </div>
         </header>
 
         <main className="flex-1 p-6 bg-secondary">
-          <div className="mb-6">
-            <div className="relative max-w-md">
+          <div className="mb-6 flex flex-col md:flex-row gap-4">
+            <div className="relative flex-1 max-w-md">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
               <Input
                 type="text"
-                placeholder="Search images..."
+                placeholder="Search gallery..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10"
               />
             </div>
+            <div className="flex gap-2 flex-wrap">
+              {categories.map((cat) => (
+                <Button
+                  key={cat.id}
+                  variant={filterCategory === cat.id ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setFilterCategory(cat.id)}
+                  className={
+                    filterCategory === cat.id ? "bg-primary-green hover:bg-secondary-green" : ""
+                  }
+                >
+                  {cat.label}
+                </Button>
+              ))}
+            </div>
           </div>
 
           {loading ? (
             <div className="text-center py-12">
-              <p className="text-muted-foreground">Loading images...</p>
+              <p className="text-muted-foreground">Loading gallery...</p>
             </div>
-          ) : filteredImages.length === 0 ? (
+          ) : filteredGallery.length === 0 ? (
             <div className="text-center py-12 bg-white rounded-xl border border-border">
-              <Image className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+              <ImageIcon className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
               <p className="text-muted-foreground">
-                {searchTerm ? "No images found matching your search" : "No images yet"}
+                {searchTerm || filterCategory !== "all"
+                  ? "No images found matching your filters"
+                  : "No gallery images yet"}
               </p>
-              <Button className="btn-primary mt-4" onClick={() => setShowAddModal(true)}>
-                <Plus className="w-4 h-4 mr-2" />
-                Add First Image
-              </Button>
+              <Link href="/admin/gallery/new">
+                <Button className="btn-primary mt-4">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add First Image
+                </Button>
+              </Link>
             </div>
           ) : (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {filteredImages.map((item, index) => (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              {filteredGallery.map((item, index) => (
                 <motion.div
                   key={item.id}
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: index * 0.05 }}
-                  className="bg-white rounded-xl border border-border overflow-hidden hover:shadow-md transition-shadow group"
+                  className="bg-white rounded-xl border border-border overflow-hidden hover:shadow-md transition-shadow"
                 >
                   <div className="relative aspect-square">
-                    <NextImage
-                      src={item.url}
-                      alt={item.alt_text || item.title}
+                    <Image
+                      src={item.image_url}
+                      alt={item.title}
                       fill
                       className="object-cover"
                     />
                   </div>
                   <div className="p-4">
-                    <h3 className="font-semibold text-foreground mb-1 truncate">{item.title}</h3>
-                    <p className="text-sm text-muted-foreground mb-4">{item.category}</p>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleDelete(item.id)}
-                      className="w-full text-red-600 hover:text-red-700 hover:bg-red-50"
-                    >
-                      <Trash2 className="w-4 h-4 mr-2" />
-                      Delete
-                    </Button>
+                    <h3 className="font-bold text-foreground mb-1 line-clamp-1">{item.title}</h3>
+                    <p className="text-sm text-muted-foreground mb-2 line-clamp-2">
+                      {item.description}
+                    </p>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-muted-foreground capitalize">
+                        {item.category}
+                      </span>
+                      <div className="flex items-center gap-2">
+                        <Link href={`/admin/gallery/edit/${item.id}`}>
+                          <Button variant="outline" size="sm">
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                        </Link>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleDelete(item.id, item.image_url)}
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
                   </div>
                 </motion.div>
               ))}
@@ -261,77 +283,6 @@ export default function GalleryManagement() {
           )}
         </main>
       </div>
-
-      {showAddModal && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="bg-white rounded-2xl p-8 max-w-md w-full"
-          >
-            <h2 className="text-2xl font-bold mb-6">Add New Image</h2>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="title">Title *</Label>
-                <Input
-                  id="title"
-                  value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  required
-                  placeholder="Image title"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="url">Image URL *</Label>
-                <Input
-                  id="url"
-                  type="url"
-                  value={formData.url}
-                  onChange={(e) => setFormData({ ...formData, url: e.target.value })}
-                  required
-                  placeholder="https://example.com/image.jpg"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="category">Category *</Label>
-                <Input
-                  id="category"
-                  value={formData.category}
-                  onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                  required
-                  placeholder="e.g., Farm, Cattle, Equipment"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="alt_text">Alt Text</Label>
-                <Input
-                  id="alt_text"
-                  value={formData.alt_text}
-                  onChange={(e) => setFormData({ ...formData, alt_text: e.target.value })}
-                  placeholder="Description for accessibility"
-                />
-              </div>
-
-              <div className="flex gap-4">
-                <Button type="submit" className="btn-primary flex-1" disabled={loading}>
-                  {loading ? "Adding..." : "Add Image"}
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setShowAddModal(false)}
-                  className="flex-1"
-                >
-                  Cancel
-                </Button>
-              </div>
-            </form>
-          </motion.div>
-        </div>
-      )}
     </div>
   );
 }
