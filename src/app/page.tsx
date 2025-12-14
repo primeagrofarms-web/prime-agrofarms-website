@@ -253,12 +253,13 @@ export default function HomePage() {
               </p>
 
               <div className="flex flex-col sm:flex-row gap-4">
-                <Link href="/about" className="btn-primary bg-white text-primary-green hover:bg-mint-green">
+                <Link href="/about" className="btn-primary bg-white text-primary-green hover:bg-mint-green group">
                   Learn More
-                  <ArrowRight className="w-5 h-5 ml-2" />
+                  <ArrowRight className="w-5 h-5 ml-2 transition-transform group-hover:translate-x-1" />
                 </Link>
-                <Link href="/contact" className="btn-secondary">
+                <Link href="/contact" className="btn-secondary group">
                   Contact Us
+                  <span className="inline-block transition-transform group-hover:scale-110"></span>
                 </Link>
               </div>
             </motion.div>
@@ -361,6 +362,8 @@ export default function HomePage() {
             initial={{ opacity: 0, scale: 0.95 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
+            whileHover={{ scale: 1.02 }}
+            transition={{ duration: 0.3 }}
             className="relative aspect-video rounded-2xl overflow-hidden shadow-2xl"
           >
             <iframe
@@ -373,9 +376,9 @@ export default function HomePage() {
           </motion.div>
 
           <div className="text-center mt-8">
-            <Link href="/contact" className="btn-primary">
+            <Link href="/contact" className="btn-primary group">
               Schedule a Farm Visit
-              <ArrowRight className="w-5 h-5 ml-2" />
+              <ArrowRight className="w-5 h-5 ml-2 transition-transform group-hover:translate-x-1" />
             </Link>
           </div>
         </div>
@@ -403,21 +406,25 @@ export default function HomePage() {
                 key={service.id}
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
+                whileHover={{ y: -8, transition: { duration: 0.3 } }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
-                className="bg-white rounded-2xl p-8 shadow-lg card-hover border border-border"
+                className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-2xl border border-border transition-all duration-300"
               >
-                <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-primary-green to-accent-green flex items-center justify-center mb-6">
+                <motion.div 
+                  whileHover={{ rotate: [0, -10, 10, -10, 0], transition: { duration: 0.5 } }}
+                  className="w-16 h-16 rounded-xl bg-gradient-to-br from-primary-green to-accent-green flex items-center justify-center mb-6"
+                >
                   <service.icon className="w-8 h-8 text-white" />
-                </div>
+                </motion.div>
                 <h3 className="text-xl font-bold text-foreground mb-3">{service.title}</h3>
                 <p className="text-muted-foreground mb-6 leading-relaxed">{service.description}</p>
                 <Link
                   href={service.link}
-                  className="inline-flex items-center text-primary-green font-semibold hover:gap-3 transition-all gap-2"
+                  className="inline-flex items-center text-primary-green font-semibold group"
                 >
                   Learn More
-                  <ChevronRight className="w-5 h-5" />
+                  <ChevronRight className="w-5 h-5 ml-2 transition-transform group-hover:translate-x-1" />
                 </Link>
               </motion.div>
             ))}
@@ -451,18 +458,23 @@ export default function HomePage() {
                 key={item.id}
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
+                whileHover={{ y: -8, transition: { duration: 0.3 } }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
-                className="bg-white rounded-2xl overflow-hidden shadow-lg card-hover"
+                className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300"
               >
-                <div className="relative aspect-[16/10]">
+                <motion.div 
+                  className="relative aspect-[16/10] overflow-hidden"
+                  whileHover={{ scale: 1.05 }}
+                  transition={{ duration: 0.4 }}
+                >
                   <Image
                     src={item.image}
                     alt={item.title}
                     fill
                     className="object-cover"
                   />
-                </div>
+                </motion.div>
                 <div className="p-6">
                   <p className="text-sm text-muted-foreground mb-2">
                     {new Date(item.date).toLocaleDateString("en-US", {
@@ -477,10 +489,10 @@ export default function HomePage() {
                   <p className="text-muted-foreground mb-4 line-clamp-2">{item.excerpt}</p>
                   <Link
                     href={`/news/${item.slug}`}
-                    className="inline-flex items-center text-primary-green font-semibold hover:gap-3 transition-all gap-2"
+                    className="inline-flex items-center text-primary-green font-semibold group"
                   >
                     Read More
-                    <ChevronRight className="w-5 h-5" />
+                    <ChevronRight className="w-5 h-5 ml-2 transition-transform group-hover:translate-x-1" />
                   </Link>
                 </div>
               </motion.article>
@@ -504,12 +516,13 @@ export default function HomePage() {
               Whether you&apos;re interested in our dairy products, training programs, or farm consultation services, we&apos;d love to hear from you.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/contact" className="btn-primary bg-white text-primary-green hover:bg-mint-green">
+              <Link href="/contact" className="btn-primary bg-white text-primary-green hover:bg-mint-green group">
                 Contact Us Today
-                <ArrowRight className="w-5 h-5 ml-2" />
+                <ArrowRight className="w-5 h-5 ml-2 transition-transform group-hover:translate-x-1" />
               </Link>
-              <Link href="/services" className="btn-secondary">
+              <Link href="/services" className="btn-secondary group">
                 Explore Services
+                <span className="inline-block transition-transform group-hover:scale-110"></span>
               </Link>
             </div>
           </motion.div>

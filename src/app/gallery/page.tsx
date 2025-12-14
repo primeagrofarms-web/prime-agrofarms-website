@@ -4,31 +4,81 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
-import { ChevronRight, X, ChevronLeft, ChevronRight as ChevronRightIcon, Eye, Heart, Grid, Rows } from "lucide-react";
+import { ChevronRight, X, ChevronLeft, ChevronRight as ChevronRightIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const categories = [
   { id: "all", label: "All Photos" },
-  { id: "facilities", label: "Facilities" },
   { id: "livestock", label: "Livestock" },
+  { id: "facilities", label: "Facilities" },
   { id: "landscape", label: "Landscape" },
   { id: "production", label: "Production" },
-  { id: "education", label: "Education" },
 ];
 
 const galleryImages = [
-  { id: 1, title: "Modern Dairy Barn", category: "facilities", image: "https://images.unsplash.com/photo-1594771804886-a933bb2d609b?w=800", views: 1250, likes: 89 },
-  { id: 2, title: "Holstein Dairy Cattle", category: "livestock", image: "https://images.unsplash.com/photo-1500595046743-cd271d694d30?w=800", views: 2100, likes: 156 },
-  { id: 3, title: "Green Pastures", category: "landscape", image: "https://images.unsplash.com/photo-1500076656116-558758c991c1?w=800", views: 980, likes: 67 },
-  { id: 4, title: "Automated Milking System", category: "production", image: "https://images.unsplash.com/photo-1516467508483-a7212febe31a?w=800", views: 1567, likes: 112 },
-  { id: 5, title: "Training Workshop", category: "education", image: "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=800", views: 876, likes: 45 },
-  { id: 6, title: "Feed Storage Silos", category: "facilities", image: "https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=800", views: 654, likes: 34 },
-  { id: 7, title: "Jersey Cows Grazing", category: "livestock", image: "https://images.unsplash.com/photo-1527153857715-3908f2bae5e8?w=800", views: 1890, likes: 143 },
-  { id: 8, title: "Farm Aerial View", category: "landscape", image: "https://images.unsplash.com/photo-1464226184884-fa280b87c399?w=800", views: 2340, likes: 198 },
-  { id: 9, title: "Quality Testing Lab", category: "production", image: "https://images.unsplash.com/photo-1582719471384-894fbb16e074?w=800", views: 432, likes: 28 },
-  { id: 10, title: "Farmer Training Session", category: "education", image: "https://images.unsplash.com/photo-1574943320219-553eb213f72d?w=800", views: 765, likes: 52 },
-  { id: 11, title: "Milking Parlor Interior", category: "facilities", image: "https://images.unsplash.com/photo-1605639156648-3d7eb5fe5ff7?w=800", views: 1123, likes: 78 },
-  { id: 12, title: "Calves at Feeding Time", category: "livestock", image: "https://images.unsplash.com/photo-1570042225831-d98fa7577f1e?w=800", views: 1678, likes: 134 },
+  { 
+    id: 1, 
+    title: "Agro Tourism", 
+    description: "Experience farm life through our agro-tourism program",
+    category: "facilities", 
+    image: "/images/gallery/Agro-Tourism.jpg"
+  },
+  { 
+    id: 2, 
+    title: "Cattle Breeding Program", 
+    description: "Our premium cattle breeding facility with modern genetics",
+    category: "livestock", 
+    image: "/images/gallery/Cattle Breeding.jpg"
+  },
+  { 
+    id: 3, 
+    title: "Cattle Breeding Excellence", 
+    description: "Advanced breeding techniques for superior dairy cattle",
+    category: "livestock", 
+    image: "/images/gallery/Cattle Breeding 1.jpg"
+  },
+  { 
+    id: 4, 
+    title: "Breeding Operations", 
+    description: "State-of-the-art breeding facilities and practices",
+    category: "livestock", 
+    image: "/images/gallery/Cattle Breeding 2.jpg"
+  },
+  { 
+    id: 5, 
+    title: "Healthy Cattle", 
+    description: "Well-maintained dairy cattle in optimal conditions",
+    category: "livestock", 
+    image: "/images/gallery/cattle.jpg"
+  },
+  { 
+    id: 6, 
+    title: "Dairy Cattle", 
+    description: "High-quality dairy cattle producing premium milk",
+    category: "livestock", 
+    image: "/images/gallery/Dairy cattle.jpg"
+  },
+  { 
+    id: 7, 
+    title: "Milk Production Facility", 
+    description: "Modern automated milking parlor with latest technology",
+    category: "production", 
+    image: "/images/gallery/Milk-Production-2-scaled.jpg"
+  },
+  { 
+    id: 8, 
+    title: "Nakitooma Ranch Aerial View", 
+    description: "Panoramic view of our expansive farming operations",
+    category: "landscape", 
+    image: "/images/gallery/Nakitooma-Ranch-drone image.jpg"
+  },
+  { 
+    id: 9, 
+    title: "Silage & Hay Production", 
+    description: "Quality feed production for year-round livestock nutrition",
+    category: "production", 
+    image: "/images/gallery/Silage-Hay-Production-1-scaled.jpg"
+  },
 ];
 
 export default function GalleryPage() {
@@ -98,33 +148,11 @@ export default function GalleryPage() {
                 </Button>
               ))}
             </div>
-            <div className="flex gap-2">
-              <Button
-                variant={viewMode === "grid" ? "default" : "outline"}
-                size="icon"
-                onClick={() => setViewMode("grid")}
-                className={viewMode === "grid" ? "bg-primary-green" : ""}
-              >
-                <Grid className="w-4 h-4" />
-              </Button>
-              <Button
-                variant={viewMode === "masonry" ? "default" : "outline"}
-                size="icon"
-                onClick={() => setViewMode("masonry")}
-                className={viewMode === "masonry" ? "bg-primary-green" : ""}
-              >
-                <Rows className="w-4 h-4" />
-              </Button>
-            </div>
           </div>
 
           <motion.div
             layout
-            className={`grid gap-6 ${
-              viewMode === "grid"
-                ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
-                : "columns-1 sm:columns-2 lg:columns-3 xl:columns-4 space-y-6"
-            }`}
+            className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
           >
             <AnimatePresence mode="popLayout">
               {filteredImages.map((image, index) => (
@@ -134,33 +162,22 @@ export default function GalleryPage() {
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.9 }}
+                  whileHover={{ y: -8, transition: { duration: 0.3 } }}
                   transition={{ delay: index * 0.05 }}
-                  className={`group relative overflow-hidden rounded-xl shadow-lg cursor-pointer ${
-                    viewMode === "masonry" ? "break-inside-avoid mb-6" : ""
-                  }`}
+                  className="group relative overflow-hidden rounded-xl shadow-lg cursor-pointer hover:shadow-2xl transition-all duration-300"
                   onClick={() => setSelectedImage(image)}
                 >
-                  <div className={`relative ${viewMode === "grid" ? "aspect-square" : ""}`}>
+                  <div className="relative aspect-square">
                     <Image
                       src={image.image}
                       alt={image.title}
-                      width={400}
-                      height={viewMode === "masonry" ? (index % 3 === 0 ? 500 : 300) : 400}
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                      fill
+                      className="object-cover transition-transform duration-500 group-hover:scale-110"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                     <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
-                      <h3 className="text-white font-bold mb-2">{image.title}</h3>
-                      <div className="flex items-center gap-4 text-white/80 text-sm">
-                        <span className="flex items-center gap-1">
-                          <Eye className="w-4 h-4" />
-                          {image.views}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <Heart className="w-4 h-4" />
-                          {image.likes}
-                        </span>
-                      </div>
+                      <h3 className="text-white font-bold mb-1">{image.title}</h3>
+                      <p className="text-white/80 text-sm line-clamp-2">{image.description}</p>
                     </div>
                   </div>
                 </motion.div>
@@ -186,7 +203,7 @@ export default function GalleryPage() {
             onClick={() => setSelectedImage(null)}
           >
             <button
-              className="absolute top-4 right-4 text-white/80 hover:text-white p-2"
+              className="absolute top-4 right-4 text-white/80 hover:text-white p-2 transition-colors"
               onClick={() => setSelectedImage(null)}
             >
               <X className="w-8 h-8" />
@@ -194,7 +211,7 @@ export default function GalleryPage() {
 
             {currentIndex > 0 && (
               <button
-                className="absolute left-4 text-white/80 hover:text-white p-2"
+                className="absolute left-4 text-white/80 hover:text-white p-2 transition-colors"
                 onClick={(e) => {
                   e.stopPropagation();
                   handlePrevious();
@@ -206,7 +223,7 @@ export default function GalleryPage() {
 
             {currentIndex < filteredImages.length - 1 && (
               <button
-                className="absolute right-4 text-white/80 hover:text-white p-2"
+                className="absolute right-4 text-white/80 hover:text-white p-2 transition-colors"
                 onClick={(e) => {
                   e.stopPropagation();
                   handleNext();
@@ -230,19 +247,10 @@ export default function GalleryPage() {
                 height={800}
                 className="w-full h-auto max-h-[80vh] object-contain rounded-lg"
               />
-              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6 rounded-b-lg">
+              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-6 rounded-b-lg">
                 <h3 className="text-white text-xl font-bold mb-2">{selectedImage.title}</h3>
-                <div className="flex items-center gap-6 text-white/80">
-                  <span className="flex items-center gap-2">
-                    <Eye className="w-5 h-5" />
-                    {selectedImage.views} views
-                  </span>
-                  <span className="flex items-center gap-2">
-                    <Heart className="w-5 h-5" />
-                    {selectedImage.likes} likes
-                  </span>
-                  <span className="capitalize">{selectedImage.category}</span>
-                </div>
+                <p className="text-white/80 mb-3">{selectedImage.description}</p>
+                <span className="capitalize text-white/60 text-sm">{selectedImage.category}</span>
               </div>
             </motion.div>
           </motion.div>

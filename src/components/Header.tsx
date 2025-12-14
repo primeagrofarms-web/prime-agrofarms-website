@@ -82,16 +82,17 @@ export function Header() {
               {navLinks.map((link) => (
                 <div
                   key={link.href}
-                  className="relative"
+                  className="relative group"
                   onMouseEnter={() => link.submenu && setActiveSubmenu(link.label)}
                   onMouseLeave={() => setActiveSubmenu(null)}
                 >
                   <Link
                     href={link.href}
-                    className="px-4 py-2 text-foreground hover:text-primary-green font-medium transition-colors flex items-center gap-1"
+                    className="relative px-4 py-2 text-foreground hover:text-primary-green font-medium transition-colors flex items-center gap-1"
                   >
                     {link.label}
                     {link.submenu && <ChevronDown className="w-4 h-4" />}
+                    <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary-green transition-all duration-300 group-hover:w-full"></span>
                   </Link>
 
                   <AnimatePresence>
