@@ -22,12 +22,12 @@ export const sendContactEmail = async (formData: {
       EMAILJS_CONFIG.serviceId,
       EMAILJS_CONFIG.templateId,
       {
-        from_name: formData.name,
-        from_email: formData.email,
+        name: formData.name,
+        email: formData.email,
         phone: formData.phone,
         subject: formData.subject,
         message: formData.message,
-        to_email: 'primeagrofarmslimited@gmail.com',
+        submitted_at: new Date().toLocaleString(),
       },
       EMAILJS_CONFIG.publicKey
     );
