@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import {
@@ -22,6 +22,7 @@ import {
   BookOpen,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { supabase } from "@/lib/supabase";
 
 const sidebarItems = [
   { icon: LayoutDashboard, label: "Dashboard", href: "/admin", active: true },
@@ -35,13 +36,6 @@ const sidebarItems = [
   { icon: Settings, label: "Settings", href: "/admin/settings" },
 ];
 
-const stats = [
-  { label: "Total News", value: "24", change: "+3 this month", icon: Newspaper, color: "bg-blue-500" },
-  { label: "Gallery Images", value: "156", change: "+12 this month", icon: Image, color: "bg-green-500" },
-  { label: "Messages", value: "8", change: "3 unread", icon: Mail, color: "bg-orange-500" },
-  { label: "Subscribers", value: "1,234", change: "+45 this month", icon: UserPlus, color: "bg-purple-500" },
-];
-
 const recentActivity = [
   { type: "message", content: "New contact message from John Doe", time: "5 min ago" },
   { type: "news", content: "News article published: Best Farmer 2025", time: "1 hour ago" },
@@ -51,6 +45,80 @@ const recentActivity = [
 
 export default function AdminDashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [stats, setStats] = useState([
+    { label: "Total News", value: "0", change: "+0 this month", icon: Newspaper, color: "bg-blue-500" },
+    { label: "Gallery Images", value: "0", change: "+0 this month", icon: Image, color: "bg-green-500" },
+    { label: "Messages", value: "0", change: "0 unread", icon: Mail, color: "bg-orange-500" },
+    { label: "Subscribers", value: "0", change: "+0 this month", icon: UserPlus, color: "bg-purple-500" },
+  ]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchDashboardStats();
+  }, []);
+
+  const fetchDashboardStats = async () => {
+    try {
+      const oneMonthAgo = new Date();
+      oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+
+      const [newsResult, galleryResult, subscribersResult] = await Promise.all([
+        supabase.from("news").select("id, created_at", { count: "exact" }),
+        supabase.from("gallery").select("id, created_at", { count: "exact" }),
+        supabase.from("newsletter_subscribers").select("id, created_at", { count: "exact" }),
+      ]);
+
+      const totalNews = newsResult.count || 0;
+      const newsThisMonth = newsResult.data?.filter(
+        (item) => new Date(item.created_at) >= oneMonthAgo
+      ).length || 0;
+
+      const totalGallery = galleryResult.count || 0;
+      const galleryThisMonth = galleryResult.data?.filter(
+        (item) => new Date(item.created_at) >= oneMonthAgo
+      ).length || 0;
+
+      const totalSubscribers = subscribersResult.count || 0;
+      const subscribersThisMonth = subscribersResult.data?.filter(
+        (item) => new Date(item.created_at) >= oneMonthAgo
+      ).length || 0;
+
+      setStats([
+        {
+          label: "Total News",
+          value: totalNews.toString(),
+          change: `+${newsThisMonth} this month`,
+          icon: Newspaper,
+          color: "bg-blue-500",
+        },
+        {
+          label: "Gallery Images",
+          value: totalGallery.toString(),
+          change: `+${galleryThisMonth} this month`,
+          icon: Image,
+          color: "bg-green-500",
+        },
+        {
+          label: "Messages",
+          value: "0",
+          change: "0 unread",
+          icon: Mail,
+          color: "bg-orange-500",
+        },
+        {
+          label: "Subscribers",
+          value: totalSubscribers.toString(),
+          change: `+${subscribersThisMonth} this month`,
+          icon: UserPlus,
+          color: "bg-purple-500",
+        },
+      ]);
+    } catch (error) {
+      console.error("Error fetching dashboard stats:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="flex min-h-screen">
@@ -138,29 +206,40 @@ export default function AdminDashboard() {
 
         <main className="flex-1 p-6">
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            {stats.map((stat, index) => (
-              <motion.div
-                key={stat.label}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
-                className="bg-white rounded-xl p-6 shadow-sm border border-border"
-              >
-                <div className="flex items-start justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground">{stat.label}</p>
-                    <p className="text-3xl font-bold text-foreground mt-1">{stat.value}</p>
-                    <p className="text-xs text-green-600 mt-2 flex items-center gap-1">
-                      <TrendingUp className="w-3 h-3" />
-                      {stat.change}
-                    </p>
-                  </div>
-                  <div className={`w-12 h-12 rounded-lg ${stat.color} flex items-center justify-center`}>
-                    <stat.icon className="w-6 h-6 text-white" />
-                  </div>
+            {loading ? (
+              Array.from({ length: 4 }).map((_, index) => (
+                <div
+                  key={index}
+                  className="bg-white rounded-xl p-6 shadow-sm border border-border animate-pulse"
+                >
+                  <div className="h-20"></div>
                 </div>
-              </motion.div>
-            ))}
+              ))
+            ) : (
+              stats.map((stat, index) => (
+                <motion.div
+                  key={stat.label}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                  className="bg-white rounded-xl p-6 shadow-sm border border-border"
+                >
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <p className="text-sm text-muted-foreground">{stat.label}</p>
+                      <p className="text-3xl font-bold text-foreground mt-1">{stat.value}</p>
+                      <p className="text-xs text-green-600 mt-2 flex items-center gap-1">
+                        <TrendingUp className="w-3 h-3" />
+                        {stat.change}
+                      </p>
+                    </div>
+                    <div className={`w-12 h-12 rounded-lg ${stat.color} flex items-center justify-center`}>
+                      <stat.icon className="w-6 h-6 text-white" />
+                    </div>
+                  </div>
+                </motion.div>
+              ))
+            )}
           </div>
 
           <div className="grid lg:grid-cols-2 gap-6">
