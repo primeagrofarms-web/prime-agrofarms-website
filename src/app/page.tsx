@@ -118,6 +118,23 @@ function CountUp({ end, duration = 2000 }: { end: number; duration?: number }) {
   return <span ref={countRef}>{count}</span>;
 }
 
+function TypeWriter({ text }: { text: string }) {
+  const [displayText, setDisplayText] = useState("");
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  useEffect(() => {
+    if (currentIndex < text.length) {
+      const timeout = setTimeout(() => {
+        setDisplayText((prev) => prev + text[currentIndex]);
+        setCurrentIndex((prev) => prev + 1);
+      }, 80);
+      return () => clearTimeout(timeout);
+    }
+  }, [currentIndex, text]);
+
+  return <>{displayText}</>;
+}
+
 function CardThrowCarousel() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [progress, setProgress] = useState(0);
@@ -241,10 +258,7 @@ export default function HomePage() {
               </div>
 
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">
-                Welcome to{" "}
-                <span className="bg-gradient-to-r from-white via-mint-green to-light-green bg-clip-text text-transparent">
-                  Prime Agro Farm
-                </span>
+                <TypeWriter text="Welcome to Prime Agro Farm" />
               </h1>
 
               <p className="text-lg md:text-xl text-white/90 leading-relaxed max-w-xl">
