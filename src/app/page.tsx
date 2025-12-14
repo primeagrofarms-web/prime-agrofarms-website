@@ -134,7 +134,6 @@ function CardThrowCarousel() {
 
     const slideTimer = setTimeout(() => {
       setCurrentIndex((prev) => (prev + 1) % heroImages.length);
-      setProgress(0);
     }, DURATION);
 
     return () => {
