@@ -1,7 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { Facebook, Twitter, Instagram, Linkedin, MapPin, Phone, Mail, Clock } from "lucide-react";
+import { useState } from "react";
+import { Facebook, Twitter, Instagram, Linkedin, MapPin, Phone, Mail, Clock, Send } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 const quickLinks = [
   { href: "/about", label: "About Us" },
@@ -27,6 +30,33 @@ const socialLinks = [
 ];
 
 export function Footer() {
+  const [email, setEmail] = useState("");
+  const [isSubscribing, setIsSubscribing] = useState(false);
+  const [subscribed, setSubscribed] = useState(false);
+
+  const handleNewsletterSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubscribing(true);
+    
+    try {
+      const response = await fetch('/api/newsletter', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+      
+      if (response.ok) {
+        setSubscribed(true);
+        setEmail("");
+        setTimeout(() => setSubscribed(false), 5000);
+      }
+    } catch (error) {
+      console.error('Newsletter subscription error:', error);
+    } finally {
+      setIsSubscribing(false);
+    }
+  };
+
   return (
     <footer className="bg-primary-green text-white">
       <div className="container-custom section-padding">
@@ -77,48 +107,63 @@ export function Footer() {
           </div>
 
           <div>
-            <h4 className="text-lg font-bold mb-6">Our Services</h4>
-            <ul className="space-y-3">
-              {services.map((service) => (
-                <li key={service.href}>
-                  <Link
-                    href={service.href}
-                    className="text-white/80 hover:text-white hover:translate-x-1 transition-all inline-block"
-                  >
-                    {service.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div>
             <h4 className="text-lg font-bold mb-6">Contact Info</h4>
             <ul className="space-y-4">
               <li className="flex items-start gap-3">
                 <MapPin className="w-5 h-5 mt-0.5 text-mint-green flex-shrink-0" />
-                <span className="text-white/80">Zirobwe Town Council, Luweero District, Uganda</span>
+                <span className="text-white/80 text-sm">Zirobwe Town Council, Luweero District, Uganda</span>
               </li>
               <li className="flex items-center gap-3">
                 <Phone className="w-5 h-5 text-mint-green flex-shrink-0" />
-                <a href="tel:+256700123456" className="text-white/80 hover:text-white transition-colors">
-                  +256 700 123 456
+                <a href="tel:+256701945174" className="text-white/80 hover:text-white transition-colors text-sm">
+                  +256 701 945174
                 </a>
               </li>
               <li className="flex items-center gap-3">
                 <Mail className="w-5 h-5 text-mint-green flex-shrink-0" />
-                <a href="mailto:info@prime-agrofarms.com" className="text-white/80 hover:text-white transition-colors">
-                  info@prime-agrofarms.com
+                <a href="mailto:primeagrofarmslimited@gmail.com" className="text-white/80 hover:text-white transition-colors text-sm break-all">
+                  primeagrofarmslimited@gmail.com
                 </a>
               </li>
               <li className="flex items-start gap-3">
                 <Clock className="w-5 h-5 mt-0.5 text-mint-green flex-shrink-0" />
-                <div className="text-white/80">
-                  <p>Mon - Fri: 8:00 AM - 5:00 PM</p>
-                  <p>Sat: 9:00 AM - 1:00 PM</p>
+                <div className="text-white/80 text-sm">
+                  <p>Mon - Sat: 9:00 AM - 6:00 PM</p>
+                  <p>Sun: By appointment</p>
                 </div>
               </li>
             </ul>
+          </div>
+
+          <div>
+            <h4 className="text-lg font-bold mb-6">Newsletter</h4>
+            <p className="text-white/80 mb-4 text-sm">
+              Subscribe to get updates and news about our farm activities.
+            </p>
+            {subscribed ? (
+              <div className="bg-white/10 border border-white/20 rounded-lg p-4 text-center">
+                <p className="text-sm">✓ Successfully subscribed!</p>
+              </div>
+            ) : (
+              <form onSubmit={handleNewsletterSubmit} className="space-y-3">
+                <Input
+                  type="email"
+                  placeholder="Your email address"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
+                />
+                <Button
+                  type="submit"
+                  disabled={isSubscribing}
+                  className="w-full bg-white text-primary-green hover:bg-white/90"
+                >
+                  {isSubscribing ? "Subscribing..." : "Subscribe"}
+                  <Send className="w-4 h-4 ml-2" />
+                </Button>
+              </form>
+            )}
           </div>
         </div>
       </div>

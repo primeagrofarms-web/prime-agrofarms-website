@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { MapPin, Phone, Mail, Clock, Send, ChevronRight, CheckCircle, MessageCircle, Users, BookOpen } from "lucide-react";
@@ -10,27 +10,28 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
+import { initEmailJS, sendContactEmail } from "@/lib/emailjs";
 
 const contactInfo = [
   {
     icon: MapPin,
     title: "Visit Us",
-    content: "Zirobwe Town Council, Luweero District, Uganda",
-    link: "https://maps.google.com/?q=Zirobwe,Luweero,Uganda",
+    content: "Zirobwe Town Council, Luweero District, Uganda. 2 kilometers off Kyikyusa Road",
+    link: "https://maps.google.com/?q=MMVM+FMC,Zirobwe",
     linkText: "Get Directions",
   },
   {
     icon: Phone,
     title: "Call Us",
-    content: "+256 700 123 456",
-    link: "tel:+256700123456",
+    content: "+256 701 945174",
+    link: "tel:+256701945174",
     linkText: "Call Now",
   },
   {
     icon: Mail,
     title: "Email Us",
-    content: "info@prime-agrofarms.com",
-    link: "mailto:info@prime-agrofarms.com",
+    content: "primeagrofarmslimited@gmail.com",
+    link: "mailto:primeagrofarmslimited@gmail.com",
     linkText: "Send Email",
   },
 ];
@@ -45,9 +46,9 @@ const subjects = [
 ];
 
 const workingHours = [
-  { day: "Monday - Friday", hours: "8:00 AM - 5:00 PM" },
-  { day: "Saturday", hours: "9:00 AM - 1:00 PM" },
-  { day: "Sunday", hours: "Closed" },
+  { day: "Monday - Saturday", hours: "9:00 AM - 6:00 PM" },
+  { day: "Sunday", hours: "By appointment only" },
+  { day: "Public Holidays", hours: "Please call to confirm" },
 ];
 
 const additionalInfo = [
@@ -59,6 +60,7 @@ const additionalInfo = [
 export default function ContactPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [error, setError] = useState("");
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -68,22 +70,40 @@ export default function ContactPage() {
     newsletter: false,
   });
 
+  useEffect(() => {
+    initEmailJS();
+  }, []);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setError("");
     
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    const result = await sendContactEmail(formData);
     
-    setIsSubmitting(false);
-    setIsSubmitted(true);
-    setFormData({
-      name: "",
-      email: "",
-      phone: "",
-      subject: "",
-      message: "",
-      newsletter: false,
-    });
+    if (result.success) {
+      if (formData.newsletter) {
+        await fetch('/api/newsletter', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: formData.email }),
+        }).catch(err => console.error('Newsletter subscription error:', err));
+      }
+      
+      setIsSubmitting(false);
+      setIsSubmitted(true);
+      setFormData({
+        name: "",
+        email: "",
+        phone: "",
+        subject: "",
+        message: "",
+        newsletter: false,
+      });
+    } else {
+      setIsSubmitting(false);
+      setError("Failed to send message. Please try again or contact us directly.");
+    }
   };
 
   return (
@@ -132,7 +152,7 @@ export default function ContactPage() {
                   <item.icon className="w-7 h-7 text-white" />
                 </div>
                 <h3 className="text-lg font-bold text-foreground mb-2">{item.title}</h3>
-                <p className="text-muted-foreground mb-3">{item.content}</p>
+                <p className="text-muted-foreground mb-3 text-sm">{item.content}</p>
                 <span className="text-primary-green font-medium hover:underline">{item.linkText}</span>
               </motion.a>
             ))}
@@ -167,6 +187,12 @@ export default function ContactPage() {
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-6">
+                  {error && (
+                    <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-800 text-sm">
+                      {error}
+                    </div>
+                  )}
+                  
                   <div className="grid sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="name">Full Name *</Label>
@@ -287,6 +313,11 @@ export default function ContactPage() {
                       <span className="font-medium text-foreground">{item.hours}</span>
                     </div>
                   ))}
+                </div>
+                <div className="mt-4 pt-4 border-t border-border">
+                  <p className="text-sm text-muted-foreground">
+                    <strong>Emergency Line:</strong> <a href="tel:+256701945174" className="text-primary-green hover:underline">+256 701 945174</a>
+                  </p>
                 </div>
               </div>
 
