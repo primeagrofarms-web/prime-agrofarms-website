@@ -18,6 +18,8 @@ import {
   Edit,
   Trash2,
   Search,
+  Heart,
+  MessageCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -47,6 +49,8 @@ interface NewsItem {
   image_url: string;
   published_date: string;
   created_at: string;
+  likes_count?: number;
+  comments_count?: number;
 }
 
 export default function NewsManagement() {
@@ -61,13 +65,34 @@ export default function NewsManagement() {
 
   const fetchNews = async () => {
     try {
-      const { data, error } = await supabase
+      const { data: newsData, error: newsError } = await supabase
         .from("news")
         .select("*")
         .order("published_date", { ascending: false });
 
-      if (error) throw error;
-      setNews(data || []);
+      if (newsError) throw newsError;
+
+      const newsWithCounts = await Promise.all(
+        (newsData || []).map(async (item) => {
+          const { count: likesCount } = await supabase
+            .from("news_likes")
+            .select("*", { count: "exact", head: true })
+            .eq("news_id", item.id);
+
+          const { count: commentsCount } = await supabase
+            .from("news_comments")
+            .select("*", { count: "exact", head: true })
+            .eq("news_id", item.id);
+
+          return {
+            ...item,
+            likes_count: likesCount || 0,
+            comments_count: commentsCount || 0,
+          };
+        })
+      );
+
+      setNews(newsWithCounts);
     } catch (error) {
       console.error("Error fetching news:", error);
     } finally {
@@ -217,9 +242,21 @@ export default function NewsManagement() {
                       <p className="text-muted-foreground text-sm mb-4 line-clamp-2">
                         {item.excerpt}
                       </p>
-                      <p className="text-xs text-muted-foreground">
-                        Published: {new Date(item.published_date).toLocaleDateString()}
-                      </p>
+                      <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                        <span>
+                          Published: {new Date(item.published_date).toLocaleDateString()}
+                        </span>
+                        <div className="flex items-center gap-3">
+                          <span className="flex items-center gap-1">
+                            <Heart className="w-4 h-4" />
+                            {item.likes_count || 0}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <MessageCircle className="w-4 h-4" />
+                            {item.comments_count || 0}
+                          </span>
+                        </div>
+                      </div>
                     </div>
                     <div className="flex items-center gap-2">
                       <Link href={`/admin/news/edit/${item.id}`}>

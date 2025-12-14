@@ -1,12 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
 import {
   LayoutDashboard,
   Newspaper,
-  Image,
+  Image as ImageIcon,
   MessageSquare,
   Users,
   Mail,
@@ -15,40 +16,49 @@ import {
   Menu,
   X,
   ArrowLeft,
+  Upload,
   Save,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { createClient } from "@supabase/supabase-js";
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+import { supabase } from "@/lib/supabase";
 
 const sidebarItems = [
   { icon: LayoutDashboard, label: "Dashboard", href: "/admin" },
   { icon: Newspaper, label: "News", href: "/admin/news", active: true },
-  { icon: Image, label: "Gallery", href: "/admin/gallery" },
+  { icon: ImageIcon, label: "Gallery", href: "/admin/gallery" },
   { icon: MessageSquare, label: "Comments", href: "/admin/comments" },
   { icon: Mail, label: "Messages", href: "/admin/messages" },
   { icon: Users, label: "Leadership", href: "/admin/leadership" },
   { icon: Settings, label: "Settings", href: "/admin/settings" },
 ];
 
-export default function NewNews() {
+export default function NewNewsPage() {
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string>("");
+
   const [formData, setFormData] = useState({
     title: "",
     slug: "",
     excerpt: "",
     content: "",
-    image_url: "",
+    published_date: new Date().toISOString().split("T")[0],
   });
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setImageFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const generateSlug = (title: string) => {
     return title
@@ -57,7 +67,8 @@ export default function NewNews() {
       .replace(/(^-|-$)/g, "");
   };
 
-  const handleTitleChange = (title: string) => {
+  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const title = e.target.value;
     setFormData({
       ...formData,
       title,
@@ -70,14 +81,37 @@ export default function NewNews() {
     setLoading(true);
 
     try {
-      const { error } = await supabase.from("news").insert([
+      let imageUrl = "";
+
+      // Upload image to Supabase Storage
+      if (imageFile) {
+        const fileExt = imageFile.name.split(".").pop();
+        const fileName = `${Date.now()}-${generateSlug(formData.title)}.${fileExt}`;
+        const filePath = `${fileName}`;
+
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from("news-images")
+          .upload(filePath, imageFile);
+
+        if (uploadError) throw uploadError;
+
+        // Get public URL
+        const { data } = supabase.storage
+          .from("news-images")
+          .getPublicUrl(filePath);
+
+        imageUrl = data.publicUrl;
+      }
+
+      // Insert news article
+      const { error: insertError } = await supabase.from("news").insert([
         {
           ...formData,
-          published_date: new Date().toISOString(),
+          image_url: imageUrl,
         },
       ]);
 
-      if (error) throw error;
+      if (insertError) throw insertError;
 
       alert("News article created successfully!");
       router.push("/admin/news");
@@ -153,7 +187,7 @@ export default function NewNews() {
                 {sidebarOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
               </button>
               <Link href="/admin/news">
-                <Button variant="outline" size="sm">
+                <Button variant="ghost" size="sm">
                   <ArrowLeft className="w-4 h-4 mr-2" />
                   Back
                 </Button>
@@ -164,79 +198,152 @@ export default function NewNews() {
         </header>
 
         <main className="flex-1 p-6 bg-secondary">
-          <form onSubmit={handleSubmit} className="max-w-3xl mx-auto">
-            <div className="bg-white rounded-xl border border-border p-8 space-y-6">
-              <div className="space-y-2">
-                <Label htmlFor="title">Title *</Label>
-                <Input
-                  id="title"
-                  value={formData.title}
-                  onChange={(e) => handleTitleChange(e.target.value)}
-                  required
-                  placeholder="Enter news title"
-                />
-              </div>
+          <motion.form
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            onSubmit={handleSubmit}
+            className="max-w-4xl mx-auto bg-white rounded-xl border border-border p-8 space-y-6"
+          >
+            <div>
+              <label className="block text-sm font-semibold text-foreground mb-2">
+                Title *
+              </label>
+              <Input
+                type="text"
+                value={formData.title}
+                onChange={handleTitleChange}
+                placeholder="Enter news title"
+                required
+              />
+            </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="slug">Slug *</Label>
-                <Input
-                  id="slug"
-                  value={formData.slug}
-                  onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
-                  required
-                  placeholder="url-friendly-slug"
-                />
-              </div>
+            <div>
+              <label className="block text-sm font-semibold text-foreground mb-2">
+                Slug *
+              </label>
+              <Input
+                type="text"
+                value={formData.slug}
+                onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
+                placeholder="news-slug-url"
+                required
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                URL-friendly version (auto-generated from title)
+              </p>
+            </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="excerpt">Excerpt *</Label>
-                <Textarea
-                  id="excerpt"
-                  value={formData.excerpt}
-                  onChange={(e) => setFormData({ ...formData, excerpt: e.target.value })}
-                  required
-                  placeholder="Brief summary of the article"
-                  rows={3}
-                />
-              </div>
+            <div>
+              <label className="block text-sm font-semibold text-foreground mb-2">
+                Excerpt *
+              </label>
+              <textarea
+                value={formData.excerpt}
+                onChange={(e) => setFormData({ ...formData, excerpt: e.target.value })}
+                placeholder="Brief summary of the news"
+                rows={3}
+                className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-green"
+                required
+              />
+            </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="content">Content *</Label>
-                <Textarea
-                  id="content"
-                  value={formData.content}
-                  onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                  required
-                  placeholder="Full article content"
-                  rows={12}
-                />
-              </div>
+            <div>
+              <label className="block text-sm font-semibold text-foreground mb-2">
+                Content *
+              </label>
+              <textarea
+                value={formData.content}
+                onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+                placeholder="Full article content"
+                rows={10}
+                className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-green"
+                required
+              />
+            </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="image_url">Image URL *</Label>
-                <Input
-                  id="image_url"
-                  type="url"
-                  value={formData.image_url}
-                  onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
-                  required
-                  placeholder="https://example.com/image.jpg"
-                />
-              </div>
-
-              <div className="flex gap-4">
-                <Button type="submit" className="btn-primary" disabled={loading}>
-                  <Save className="w-4 h-4 mr-2" />
-                  {loading ? "Publishing..." : "Publish News"}
-                </Button>
-                <Link href="/admin/news">
-                  <Button type="button" variant="outline">
-                    Cancel
-                  </Button>
-                </Link>
+            <div>
+              <label className="block text-sm font-semibold text-foreground mb-2">
+                Feature Image *
+              </label>
+              <div className="border-2 border-dashed border-border rounded-lg p-8 text-center">
+                {imagePreview ? (
+                  <div className="space-y-4">
+                    <img
+                      src={imagePreview}
+                      alt="Preview"
+                      className="max-h-64 mx-auto rounded-lg"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => {
+                        setImageFile(null);
+                        setImagePreview("");
+                      }}
+                    >
+                      Remove Image
+                    </Button>
+                  </div>
+                ) : (
+                  <div>
+                    <Upload className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+                    <input
+                      type="file"
+                      id="image-upload"
+                      accept="image/*"
+                      onChange={handleImageChange}
+                      className="hidden"
+                      required
+                    />
+                    <label htmlFor="image-upload">
+                      <Button type="button" variant="outline" asChild>
+                        <span>Choose Image</span>
+                      </Button>
+                    </label>
+                    <p className="text-sm text-muted-foreground mt-2">
+                      PNG, JPG or WEBP (max 5MB)
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
-          </form>
+
+            <div>
+              <label className="block text-sm font-semibold text-foreground mb-2">
+                Published Date *
+              </label>
+              <Input
+                type="date"
+                value={formData.published_date}
+                onChange={(e) =>
+                  setFormData({ ...formData, published_date: e.target.value })
+                }
+                required
+              />
+            </div>
+
+            <div className="flex gap-4 pt-4">
+              <Button
+                type="submit"
+                className="btn-primary flex-1"
+                disabled={loading}
+              >
+                {loading ? (
+                  "Creating..."
+                ) : (
+                  <>
+                    <Save className="w-4 h-4 mr-2" />
+                    Publish Article
+                  </>
+                )}
+              </Button>
+              <Link href="/admin/news" className="flex-1">
+                <Button type="button" variant="outline" className="w-full">
+                  Cancel
+                </Button>
+              </Link>
+            </div>
+          </motion.form>
         </main>
       </div>
     </div>

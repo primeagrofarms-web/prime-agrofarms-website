@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight, Milk, Sprout, GraduationCap, Award, Users, MapPin, TrendingUp, Play, ChevronRight } from "lucide-react";
 import { useEffect, useState, useRef } from "react";
+import { supabase } from "@/lib/supabase";
 
 const heroImages = [
   {
@@ -56,32 +57,14 @@ const services = [
   },
 ];
 
-const news = [
-  {
-    id: 1,
-    title: "Prime Agro Farm Wins Uganda's Best Farmer 2025",
-    excerpt: "Sebastian Rutah Ngambwa recognized for outstanding contributions to agricultural excellence.",
-    image: "https://images.unsplash.com/photo-1500595046743-cd271d694d30?w=600",
-    date: "2025-01-15",
-    slug: "best-farmer-2025",
-  },
-  {
-    id: 2,
-    title: "New Automated Milking System Installation",
-    excerpt: "Modernizing our dairy operations with cutting-edge robotic milking technology.",
-    image: "https://images.unsplash.com/photo-1594771804886-a933bb2d609b?w=600",
-    date: "2024-12-01",
-    slug: "new-milking-system",
-  },
-  {
-    id: 3,
-    title: "Community Training Program Launch",
-    excerpt: "Empowering local farmers with modern agricultural techniques and sustainable practices.",
-    image: "https://images.unsplash.com/photo-1500076656116-558758c991c1?w=600",
-    date: "2024-11-15",
-    slug: "community-training",
-  },
-];
+interface NewsItem {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt: string;
+  image_url: string;
+  published_date: string;
+}
 
 function CountUp({ end, duration = 2000 }: { end: number; duration?: number }) {
   const [count, setCount] = useState(0);
@@ -235,6 +218,30 @@ function CardThrowCarousel() {
 }
 
 export default function HomePage() {
+  const [news, setNews] = useState<NewsItem[]>([]);
+  const [newsLoading, setNewsLoading] = useState(true);
+
+  useEffect(() => {
+    fetchNews();
+  }, []);
+
+  const fetchNews = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("news")
+        .select("id, title, slug, excerpt, image_url, published_date")
+        .order("published_date", { ascending: false })
+        .limit(3);
+
+      if (error) throw error;
+      setNews(data || []);
+    } catch (error) {
+      console.error("Error fetching news:", error);
+    } finally {
+      setNewsLoading(false);
+    }
+  };
+
   return (
     <>
       <section className="relative min-h-[90vh] gradient-green text-white overflow-hidden">
@@ -465,52 +472,62 @@ export default function HomePage() {
             </Link>
           </motion.div>
 
-          <div className="grid md:grid-cols-3 gap-8">
-            {news.map((item, index) => (
-              <motion.article
-                key={item.id}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                whileHover={{ y: -8, transition: { duration: 0.3 } }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300"
-              >
-                <motion.div 
-                  className="relative aspect-[16/10] overflow-hidden"
-                  whileHover={{ scale: 1.05 }}
-                  transition={{ duration: 0.4 }}
+          {newsLoading ? (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">Loading news...</p>
+            </div>
+          ) : news.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">No news articles yet</p>
+            </div>
+          ) : (
+            <div className="grid md:grid-cols-3 gap-8">
+              {news.map((item, index) => (
+                <motion.article
+                  key={item.id}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  whileHover={{ y: -8, transition: { duration: 0.3 } }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.1 }}
+                  className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300"
                 >
-                  <Image
-                    src={item.image}
-                    alt={item.title}
-                    fill
-                    className="object-cover"
-                  />
-                </motion.div>
-                <div className="p-6">
-                  <p className="text-sm text-muted-foreground mb-2">
-                    {new Date(item.date).toLocaleDateString("en-US", {
-                      month: "long",
-                      day: "numeric",
-                      year: "numeric",
-                    })}
-                  </p>
-                  <h3 className="text-lg font-bold text-foreground mb-2 line-clamp-2">
-                    {item.title}
-                  </h3>
-                  <p className="text-muted-foreground mb-4 line-clamp-2">{item.excerpt}</p>
-                  <Link
-                    href={`/news/${item.slug}`}
-                    className="inline-flex items-center text-primary-green font-semibold group"
+                  <motion.div 
+                    className="relative aspect-[16/10] overflow-hidden"
+                    whileHover={{ scale: 1.05 }}
+                    transition={{ duration: 0.4 }}
                   >
-                    Read More
-                    <ChevronRight className="w-5 h-5 ml-2 transition-transform group-hover:translate-x-1" />
-                  </Link>
-                </div>
-              </motion.article>
-            ))}
-          </div>
+                    <Image
+                      src={item.image_url}
+                      alt={item.title}
+                      fill
+                      className="object-cover"
+                    />
+                  </motion.div>
+                  <div className="p-6">
+                    <p className="text-sm text-muted-foreground mb-2">
+                      {new Date(item.published_date).toLocaleDateString("en-US", {
+                        month: "long",
+                        day: "numeric",
+                        year: "numeric",
+                      })}
+                    </p>
+                    <h3 className="text-lg font-bold text-foreground mb-2 line-clamp-2">
+                      {item.title}
+                    </h3>
+                    <p className="text-muted-foreground mb-4 line-clamp-2">{item.excerpt}</p>
+                    <Link
+                      href={`/news/${item.slug}`}
+                      className="inline-flex items-center text-primary-green font-semibold group"
+                    >
+                      Read More
+                      <ChevronRight className="w-5 h-5 ml-2 transition-transform group-hover:translate-x-1" />
+                    </Link>
+                  </div>
+                </motion.article>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
