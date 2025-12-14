@@ -1,9 +1,11 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
 import { Target, Eye, Heart, Award, MapPin, Users, Milk, Calendar, Facebook, Twitter, Linkedin, Instagram, MessageCircle, ChevronRight } from "lucide-react";
+import { supabase } from "@/lib/supabase";
 
 const values = [
   {
@@ -22,6 +24,20 @@ const values = [
     description: "Excellence in everything we do, sustainability in our farming practices, community empowerment through training, and integrity in all our business relationships.",
   },
 ];
+
+interface Leader {
+  id: string;
+  name: string;
+  position: string;
+  description: string;
+  image_url: string;
+  phone: string | null;
+  whatsapp_link: string | null;
+  linkedin_link: string | null;
+  twitter_link: string | null;
+  is_ceo: boolean;
+  display_order: number;
+}
 
 const ceo = {
   name: "Sebastian Rutah Ngambwa",
@@ -78,6 +94,36 @@ const stats = [
 ];
 
 export default function AboutPage() {
+  const [ceoData, setCeoData] = useState<Leader | null>(null);
+  const [teamLeaders, setTeamLeaders] = useState<Leader[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchLeaders();
+  }, []);
+
+  const fetchLeaders = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("leaders")
+        .select("*")
+        .order("display_order", { ascending: true });
+
+      if (error) throw error;
+
+      if (data) {
+        const ceo = data.find((leader) => leader.is_ceo);
+        const others = data.filter((leader) => !leader.is_ceo);
+        setCeoData(ceo || null);
+        setTeamLeaders(others);
+      }
+    } catch (error) {
+      console.error("Error fetching leaders:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <>
       <section className="relative py-20 gradient-green text-white overflow-hidden">
@@ -233,80 +279,104 @@ export default function AboutPage() {
             </p>
           </motion.div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="bg-white rounded-2xl p-8 shadow-xl mb-12"
-          >
-            <div className="grid md:grid-cols-2 gap-8 items-center">
-              <div className="relative aspect-square max-w-sm mx-auto md:mx-0 rounded-2xl overflow-hidden">
-                <Image
-                  src={ceo.image}
-                  alt={ceo.name}
-                  fill
-                  className="object-cover"
-                />
-              </div>
-              <div>
-                <div className="inline-flex items-center gap-2 bg-gold-accent/10 text-gold-accent px-4 py-2 rounded-full text-sm font-medium mb-4">
-                  <Award className="w-4 h-4" />
-                  Uganda&apos;s Best Farmer 2025
-                </div>
-                <h3 className="text-2xl font-bold text-foreground mb-2">{ceo.name}</h3>
-                <p className="text-primary-green font-medium mb-4">{ceo.title}</p>
-                <p className="text-muted-foreground leading-relaxed mb-6">{ceo.bio}</p>
-                <div className="flex gap-3">
-                  <a href={ceo.socials.whatsapp} target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-primary-green/10 flex items-center justify-center hover:bg-primary-green hover:text-white transition-colors">
-                    <MessageCircle className="w-5 h-5" />
-                  </a>
-                  <a href={ceo.socials.twitter} target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-primary-green/10 flex items-center justify-center hover:bg-primary-green hover:text-white transition-colors">
-                    <Twitter className="w-5 h-5" />
-                  </a>
-                  <a href={ceo.socials.linkedin} target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-primary-green/10 flex items-center justify-center hover:bg-primary-green hover:text-white transition-colors">
-                    <Linkedin className="w-5 h-5" />
-                  </a>
-                  <a href={ceo.socials.facebook} target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-primary-green/10 flex items-center justify-center hover:bg-primary-green hover:text-white transition-colors">
-                    <Facebook className="w-5 h-5" />
-                  </a>
-                </div>
-              </div>
+          {loading ? (
+            <div className="text-center py-16">
+              <p className="text-muted-foreground">Loading leadership team...</p>
             </div>
-          </motion.div>
-
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {leaders.map((leader, index) => (
-              <motion.div
-                key={leader.name}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                className="bg-white rounded-xl overflow-hidden shadow-lg card-hover"
-              >
-                <div className="relative aspect-square">
-                  <Image
-                    src={leader.image}
-                    alt={leader.name}
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-                <div className="p-4 text-center">
-                  <h4 className="font-bold text-foreground">{leader.name}</h4>
-                  <p className="text-sm text-muted-foreground mb-3">{leader.title}</p>
-                  <div className="flex justify-center gap-2">
-                    <a href={leader.socials.linkedin} className="w-8 h-8 rounded-full bg-primary-green/10 flex items-center justify-center hover:bg-primary-green hover:text-white transition-colors">
-                      <Linkedin className="w-4 h-4" />
-                    </a>
-                    <a href={leader.socials.twitter} className="w-8 h-8 rounded-full bg-primary-green/10 flex items-center justify-center hover:bg-primary-green hover:text-white transition-colors">
-                      <Twitter className="w-4 h-4" />
-                    </a>
+          ) : (
+            <>
+              {ceoData && (
+                <motion.div
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  className="bg-white rounded-2xl p-8 shadow-xl mb-12"
+                >
+                  <div className="grid md:grid-cols-2 gap-8 items-center">
+                    <div className="relative aspect-square max-w-sm mx-auto md:mx-0 rounded-2xl overflow-hidden">
+                      <Image
+                        src={ceoData.image_url}
+                        alt={ceoData.name}
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+                    <div>
+                      <div className="inline-flex items-center gap-2 bg-gold-accent/10 text-gold-accent px-4 py-2 rounded-full text-sm font-medium mb-4">
+                        <Award className="w-4 h-4" />
+                        CEO
+                      </div>
+                      <h3 className="text-2xl font-bold text-foreground mb-2">{ceoData.name}</h3>
+                      <p className="text-primary-green font-medium mb-4">{ceoData.position}</p>
+                      <p className="text-muted-foreground leading-relaxed mb-6">{ceoData.description}</p>
+                      <div className="flex gap-3">
+                        {ceoData.whatsapp_link && (
+                          <a href={ceoData.whatsapp_link} target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-primary-green/10 flex items-center justify-center hover:bg-primary-green hover:text-white transition-colors">
+                            <MessageCircle className="w-5 h-5" />
+                          </a>
+                        )}
+                        {ceoData.twitter_link && (
+                          <a href={ceoData.twitter_link} target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-primary-green/10 flex items-center justify-center hover:bg-primary-green hover:text-white transition-colors">
+                            <Twitter className="w-5 h-5" />
+                          </a>
+                        )}
+                        {ceoData.linkedin_link && (
+                          <a href={ceoData.linkedin_link} target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-primary-green/10 flex items-center justify-center hover:bg-primary-green hover:text-white transition-colors">
+                            <Linkedin className="w-5 h-5" />
+                          </a>
+                        )}
+                      </div>
+                    </div>
                   </div>
+                </motion.div>
+              )}
+
+              {teamLeaders.length > 0 && (
+                <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                  {teamLeaders.map((leader, index) => (
+                    <motion.div
+                      key={leader.id}
+                      initial={{ opacity: 0, y: 30 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: index * 0.1 }}
+                      className="bg-white rounded-xl overflow-hidden shadow-lg card-hover"
+                    >
+                      <div className="relative aspect-square">
+                        <Image
+                          src={leader.image_url}
+                          alt={leader.name}
+                          fill
+                          className="object-cover"
+                        />
+                      </div>
+                      <div className="p-4 text-center">
+                        <h4 className="font-bold text-foreground">{leader.name}</h4>
+                        <p className="text-sm text-muted-foreground mb-3">{leader.position}</p>
+                        <div className="flex justify-center gap-2">
+                          {leader.whatsapp_link && (
+                            <a href={leader.whatsapp_link} target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded-full bg-primary-green/10 flex items-center justify-center hover:bg-primary-green hover:text-white transition-colors">
+                              <MessageCircle className="w-4 h-4" />
+                            </a>
+                          )}
+                          {leader.linkedin_link && (
+                            <a href={leader.linkedin_link} target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded-full bg-primary-green/10 flex items-center justify-center hover:bg-primary-green hover:text-white transition-colors">
+                              <Linkedin className="w-4 h-4" />
+                            </a>
+                          )}
+                          {leader.twitter_link && (
+                            <a href={leader.twitter_link} target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded-full bg-primary-green/10 flex items-center justify-center hover:bg-primary-green hover:text-white transition-colors">
+                              <Twitter className="w-4 h-4" />
+                            </a>
+                          )}
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))}
                 </div>
-              </motion.div>
-            ))}
-          </div>
+              )}
+            </>
+          )}
         </div>
       </section>
 
