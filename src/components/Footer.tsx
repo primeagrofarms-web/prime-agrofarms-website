@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useState } from "react";
 import { Facebook, Twitter, Instagram, Linkedin, MapPin, Phone, Mail, Clock, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -63,8 +64,13 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
           <div className="space-y-6">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
-                <span className="text-white font-bold text-xl">PA</span>
+              <div className="relative w-24 h-12">
+                <Image
+                  src="/images/logo/Prime LOGO.png"
+                  alt="Prime Agro Farm Logo"
+                  fill
+                  className="object-contain brightness-0 invert"
+                />
               </div>
               <div>
                 <h3 className="text-xl font-bold">Prime Agro Farm</h3>

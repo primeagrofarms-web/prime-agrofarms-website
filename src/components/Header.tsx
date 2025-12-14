@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, ChevronDown, Phone, Mail } from "lucide-react";
 
@@ -66,8 +67,14 @@ export function Header() {
         <div className="container-custom">
           <nav className="flex items-center justify-between h-20">
             <Link href="/" className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary-green to-accent-green flex items-center justify-center">
-                <span className="text-white font-bold text-xl">PA</span>
+              <div className="relative w-32 h-16">
+                <Image
+                  src="/images/logo/Prime LOGO.png"
+                  alt="Prime Agro Farm Logo"
+                  fill
+                  className="object-contain"
+                  priority
+                />
               </div>
               <div className="hidden sm:block">
                 <h1 className="text-xl font-bold text-primary-green leading-tight">Prime Agro Farm</h1>
