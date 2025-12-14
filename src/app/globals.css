@@ -44,88 +44,88 @@
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
   
-  --color-primary-green: #2d5016;
-  --color-secondary-green: #4a7c59;
-  --color-accent-green: #6b8e23;
-  --color-light-green: #8fbc8f;
-  --color-pale-green: #f0fff0;
-  --color-sage-green: #9caf88;
-  --color-forest-green: #228b22;
-  --color-mint-green: #98fb98;
+  --color-primary-green: #1a5d5d;
+  --color-secondary-green: #0d4747;
+  --color-accent-green: #32cd32;
+  --color-light-green: #5fb3b3;
+  --color-pale-green: #f0fffe;
+  --color-sage-green: #7fc7c7;
+  --color-forest-green: #0d4747;
+  --color-mint-green: #32cd32;
   --color-gold-accent: #daa520;
   --color-orange-accent: #ff8c00;
 }
 
 :root {
   --radius: 0.625rem;
-  --background: #fafdf8;
-  --foreground: #2c3e2d;
+  --background: #fafffe;
+  --foreground: #0d3333;
   --card: #ffffff;
-  --card-foreground: #2c3e2d;
+  --card-foreground: #0d3333;
   --popover: #ffffff;
-  --popover-foreground: #2c3e2d;
-  --primary: #2d5016;
+  --popover-foreground: #0d3333;
+  --primary: #1a5d5d;
   --primary-foreground: #ffffff;
-  --secondary: #f0fff0;
-  --secondary-foreground: #2d5016;
-  --muted: #e8f5e9;
-  --muted-foreground: #5a6b5d;
-  --accent: #4a7c59;
+  --secondary: #f0fffe;
+  --secondary-foreground: #1a5d5d;
+  --muted: #e6f7f7;
+  --muted-foreground: #5a6b6b;
+  --accent: #0d4747;
   --accent-foreground: #ffffff;
   --destructive: #dc2626;
-  --border: #c8e6c9;
-  --input: #c8e6c9;
-  --ring: #4a7c59;
-  --chart-1: #2d5016;
-  --chart-2: #4a7c59;
-  --chart-3: #6b8e23;
+  --border: #b3dfdf;
+  --input: #b3dfdf;
+  --ring: #0d4747;
+  --chart-1: #1a5d5d;
+  --chart-2: #0d4747;
+  --chart-3: #32cd32;
   --chart-4: #daa520;
   --chart-5: #ff8c00;
-  --sidebar: #2d5016;
+  --sidebar: #1a5d5d;
   --sidebar-foreground: #ffffff;
-  --sidebar-primary: #4a7c59;
+  --sidebar-primary: #0d4747;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #1a3009;
+  --sidebar-accent: #0a3030;
   --sidebar-accent-foreground: #ffffff;
-  --sidebar-border: #3d6b1f;
-  --sidebar-ring: #6b8e23;
+  --sidebar-border: #2a7070;
+  --sidebar-ring: #32cd32;
   
   --font-source-sans: 'Source Sans 3', system-ui, sans-serif;
   --font-playfair: 'Playfair Display', Georgia, serif;
 }
 
 .dark {
-  --background: #0f1a0a;
-  --foreground: #e8f5e9;
-  --card: #1a2c12;
-  --card-foreground: #e8f5e9;
-  --popover: #1a2c12;
-  --popover-foreground: #e8f5e9;
-  --primary: #6b8e23;
-  --primary-foreground: #ffffff;
-  --secondary: #2d5016;
-  --secondary-foreground: #e8f5e9;
-  --muted: #1a2c12;
-  --muted-foreground: #9caf88;
-  --accent: #4a7c59;
+  --background: #0a2020;
+  --foreground: #e6f7f7;
+  --card: #0d3333;
+  --card-foreground: #e6f7f7;
+  --popover: #0d3333;
+  --popover-foreground: #e6f7f7;
+  --primary: #32cd32;
+  --primary-foreground: #0a2020;
+  --secondary: #1a5d5d;
+  --secondary-foreground: #e6f7f7;
+  --muted: #0d3333;
+  --muted-foreground: #7fc7c7;
+  --accent: #0d4747;
   --accent-foreground: #ffffff;
   --destructive: #ef4444;
-  --border: #2d5016;
-  --input: #2d5016;
-  --ring: #6b8e23;
-  --chart-1: #6b8e23;
-  --chart-2: #4a7c59;
-  --chart-3: #8fbc8f;
+  --border: #1a5d5d;
+  --input: #1a5d5d;
+  --ring: #32cd32;
+  --chart-1: #32cd32;
+  --chart-2: #0d4747;
+  --chart-3: #5fb3b3;
   --chart-4: #daa520;
   --chart-5: #ff8c00;
-  --sidebar: #1a2c12;
-  --sidebar-foreground: #e8f5e9;
-  --sidebar-primary: #6b8e23;
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #2d5016;
-  --sidebar-accent-foreground: #e8f5e9;
-  --sidebar-border: #3d6b1f;
-  --sidebar-ring: #6b8e23;
+  --sidebar: #0d3333;
+  --sidebar-foreground: #e6f7f7;
+  --sidebar-primary: #32cd32;
+  --sidebar-primary-foreground: #0a2020;
+  --sidebar-accent: #1a5d5d;
+  --sidebar-accent-foreground: #e6f7f7;
+  --sidebar-border: #2a7070;
+  --sidebar-ring: #32cd32;
 }
 
 @layer base {
@@ -167,7 +167,7 @@
   }
   
   .gradient-green {
-    background: linear-gradient(135deg, #2d5016 0%, #4a7c59 50%, #6b8e23 100%);
+    background: linear-gradient(135deg, #1a5d5d 0%, #0d4747 50%, #1a5d5d 100%);
   }
   
   .gradient-text {
