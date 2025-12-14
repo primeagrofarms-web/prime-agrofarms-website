@@ -76,10 +76,6 @@ export function Header() {
                   priority
                 />
               </div>
-              <div className="hidden sm:block">
-                <h1 className="text-xl font-bold text-primary-green leading-tight">Prime Agro Farm</h1>
-                <p className="text-xs text-muted-foreground">Uganda&apos;s Leading Dairy Company</p>
-              </div>
             </Link>
 
             <div className="hidden lg:flex items-center gap-1">
