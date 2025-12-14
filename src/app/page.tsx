@@ -9,20 +9,24 @@ import { supabase } from "@/lib/supabase";
 
 const heroImages = [
   {
-    src: "https://images.unsplash.com/photo-1500595046743-cd271d694d30?w=800",
-    alt: "Prime Agro Farm dairy cattle grazing",
+    src: "/images/Homepage slider/Farm-drone image.jpg",
+    alt: "Prime Agro Farm drone view",
   },
   {
-    src: "https://images.unsplash.com/photo-1594771804886-a933bb2d609b?w=800",
-    alt: "Modern dairy farming technology",
+    src: "/images/Homepage slider/Cattle Breeding.jpg",
+    alt: "Cattle breeding at Prime Agro Farm",
   },
   {
-    src: "https://images.unsplash.com/photo-1500076656116-558758c991c1?w=800",
-    alt: "Sustainable agricultural practices",
+    src: "/images/Homepage slider/Agro-Tourism.jpg",
+    alt: "Agro-tourism at Prime Agro Farm",
   },
   {
-    src: "https://images.unsplash.com/photo-1560493676-04071c5f467b?w=800",
-    alt: "Farm training and education",
+    src: "/images/Homepage slider/Agro-Tourism-scaled.jpg",
+    alt: "Farm tourism facilities",
+  },
+  {
+    src: "/images/Homepage slider/Milk Production.jpg",
+    alt: "Milk production operations",
   },
 ];
 
