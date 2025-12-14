@@ -72,10 +72,6 @@ export function Footer() {
                   className="object-contain brightness-0 invert"
                 />
               </div>
-              <div>
-                <h3 className="text-xl font-bold">Prime Agro Farm</h3>
-                <p className="text-sm text-white/70">Uganda&apos;s Leading Dairy</p>
-              </div>
             </div>
             <p className="text-white/80 leading-relaxed">
               Uganda&apos;s leading integrated dairy company, representing a significant investment in modern agricultural innovation and sustainable farming practices.
