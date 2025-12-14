@@ -42,13 +42,13 @@ export function Header() {
       <div className="bg-primary-green text-white py-2 text-sm hidden md:block">
         <div className="container-custom flex justify-between items-center">
           <div className="flex items-center gap-6">
-            <a href="tel:+256700123456" className="flex items-center gap-2 hover:text-mint-green transition-colors">
+            <a href="tel:+256701945174" className="flex items-center gap-2 hover:text-mint-green transition-colors">
               <Phone className="w-4 h-4" />
-              +256 700 123 456
+              +256 701 945 174
             </a>
-            <a href="mailto:info@prime-agrofarms.com" className="flex items-center gap-2 hover:text-mint-green transition-colors">
+            <a href="mailto:primeagrofarmslimited@gmail.com?subject=Inquiry%20from%20Website&body=Hello%20Prime%20Agro%20Farm%2C%0A%0AI%20would%20like%20to%20inquire%20about%20your%20services.%0A%0AThank%20you." className="flex items-center gap-2 hover:text-mint-green transition-colors">
               <Mail className="w-4 h-4" />
-              info@prime-agrofarms.com
+              primeagrofarmslimited@gmail.com
             </a>
           </div>
           <div className="flex items-center gap-4">
