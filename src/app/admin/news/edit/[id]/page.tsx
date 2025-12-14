@@ -104,6 +104,21 @@ export default function EditNews() {
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      const maxSize = 5 * 1024 * 1024;
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+      
+      if (file.size > maxSize) {
+        alert('File size must be less than 5MB');
+        e.target.value = '';
+        return;
+      }
+      
+      if (!allowedTypes.includes(file.type)) {
+        alert('Only JPEG, PNG, and WEBP images are allowed');
+        e.target.value = '';
+        return;
+      }
+      
       setImageFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
