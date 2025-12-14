@@ -177,6 +177,36 @@
   .glass-effect {
     @apply bg-white/10 backdrop-blur-md border border-white/20;
   }
+
+  .prose {
+    @apply text-foreground;
+  }
+
+  .prose h2 {
+    @apply text-2xl font-bold mt-8 mb-4 text-foreground;
+    font-family: var(--font-playfair);
+  }
+
+  .prose h3 {
+    @apply text-xl font-bold mt-6 mb-3 text-foreground;
+    font-family: var(--font-playfair);
+  }
+
+  .prose p {
+    @apply mb-4 leading-relaxed text-muted-foreground;
+  }
+
+  .prose ul {
+    @apply list-disc pl-6 mb-4 space-y-2;
+  }
+
+  .prose ul li {
+    @apply text-muted-foreground leading-relaxed;
+  }
+
+  .prose a {
+    @apply text-primary-green hover:text-secondary-green underline transition-colors;
+  }
 }
 
 @layer utilities {
