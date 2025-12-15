@@ -36,12 +36,12 @@ const sidebarItems = [
   { icon: Settings, label: "Settings", href: "/admin/settings" },
 ];
 
-const recentActivity = [
-  { type: "message", content: "New contact message from John Doe", time: "5 min ago" },
-  { type: "news", content: "News article published: Best Farmer 2025", time: "1 hour ago" },
-  { type: "subscriber", content: "New newsletter subscriber", time: "2 hours ago" },
-  { type: "comment", content: "New comment pending approval", time: "3 hours ago" },
-];
+interface ActivityItem {
+  type: "message" | "news" | "subscriber" | "comment" | "blog" | "gallery";
+  content: string;
+  time: string;
+  timestamp: Date;
+}
 
 export default function AdminDashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -51,40 +51,56 @@ export default function AdminDashboard() {
     { label: "Messages", value: "0", change: "0 unread", icon: Mail, color: "bg-orange-500" },
     { label: "Subscribers", value: "0", change: "+0 this month", icon: UserPlus, color: "bg-purple-500" },
   ]);
+  const [recentActivity, setRecentActivity] = useState<ActivityItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchDashboardStats();
+    fetchDashboardData();
   }, []);
 
-  const fetchDashboardStats = async () => {
+  const getRelativeTime = (date: Date) => {
+    const now = new Date();
+    const diff = now.getTime() - date.getTime();
+    const minutes = Math.floor(diff / 60000);
+    const hours = Math.floor(diff / 3600000);
+    const days = Math.floor(diff / 86400000);
+
+    if (minutes < 1) return "Just now";
+    if (minutes < 60) return `${minutes} min ago`;
+    if (hours < 24) return `${hours} hour${hours > 1 ? "s" : ""} ago`;
+    return `${days} day${days > 1 ? "s" : ""} ago`;
+  };
+
+  const fetchDashboardData = async () => {
     try {
       const oneMonthAgo = new Date();
       oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
 
-      const [newsResult, galleryResult, subscribersResult, messagesResult] = await Promise.all([
-        supabase.from("news").select("id, created_at", { count: "exact" }),
-        supabase.from("gallery").select("id, created_at", { count: "exact" }),
-        supabase.from("newsletter_subscribers").select("id, created_at", { count: "exact" }),
-        supabase.from("messages").select("id, status", { count: "exact" }),
+      const [newsResult, galleryResult, subscribersResult, messagesResult, blogResult, commentsResult] = await Promise.all([
+        supabase.from("news").select("id, title, created_at").order("created_at", { ascending: false }),
+        supabase.from("gallery").select("id, title, created_at").order("created_at", { ascending: false }),
+        supabase.from("newsletter_subscribers").select("id, email, created_at").order("created_at", { ascending: false }),
+        supabase.from("messages").select("id, name, status, created_at").order("created_at", { ascending: false }),
+        supabase.from("blog_posts").select("id, title, created_at").order("created_at", { ascending: false }),
+        supabase.from("comments").select("id, author_name, created_at").order("created_at", { ascending: false }),
       ]);
 
-      const totalNews = newsResult.count || 0;
+      const totalNews = newsResult.data?.length || 0;
       const newsThisMonth = newsResult.data?.filter(
         (item) => new Date(item.created_at) >= oneMonthAgo
       ).length || 0;
 
-      const totalGallery = galleryResult.count || 0;
+      const totalGallery = galleryResult.data?.length || 0;
       const galleryThisMonth = galleryResult.data?.filter(
         (item) => new Date(item.created_at) >= oneMonthAgo
       ).length || 0;
 
-      const totalSubscribers = subscribersResult.count || 0;
+      const totalSubscribers = subscribersResult.data?.length || 0;
       const subscribersThisMonth = subscribersResult.data?.filter(
         (item) => new Date(item.created_at) >= oneMonthAgo
       ).length || 0;
 
-      const totalMessages = messagesResult.count || 0;
+      const totalMessages = messagesResult.data?.length || 0;
       const unreadMessages = messagesResult.data?.filter(
         (msg) => msg.status === "unread"
       ).length || 0;
@@ -119,8 +135,76 @@ export default function AdminDashboard() {
           color: "bg-purple-500",
         },
       ]);
+
+      // Compile recent activity from all sources
+      const activities: ActivityItem[] = [];
+
+      // Add messages
+      messagesResult.data?.slice(0, 3).forEach((msg) => {
+        activities.push({
+          type: "message",
+          content: `New contact message from ${msg.name}`,
+          time: getRelativeTime(new Date(msg.created_at)),
+          timestamp: new Date(msg.created_at),
+        });
+      });
+
+      // Add news
+      newsResult.data?.slice(0, 2).forEach((news) => {
+        activities.push({
+          type: "news",
+          content: `News article published: ${news.title}`,
+          time: getRelativeTime(new Date(news.created_at)),
+          timestamp: new Date(news.created_at),
+        });
+      });
+
+      // Add blog posts
+      blogResult.data?.slice(0, 2).forEach((blog) => {
+        activities.push({
+          type: "blog",
+          content: `Blog post published: ${blog.title}`,
+          time: getRelativeTime(new Date(blog.created_at)),
+          timestamp: new Date(blog.created_at),
+        });
+      });
+
+      // Add subscribers
+      subscribersResult.data?.slice(0, 2).forEach((sub) => {
+        activities.push({
+          type: "subscriber",
+          content: `New newsletter subscriber: ${sub.email}`,
+          time: getRelativeTime(new Date(sub.created_at)),
+          timestamp: new Date(sub.created_at),
+        });
+      });
+
+      // Add comments
+      commentsResult.data?.slice(0, 2).forEach((comment) => {
+        activities.push({
+          type: "comment",
+          content: `New comment from ${comment.author_name}`,
+          time: getRelativeTime(new Date(comment.created_at)),
+          timestamp: new Date(comment.created_at),
+        });
+      });
+
+      // Add gallery uploads
+      galleryResult.data?.slice(0, 2).forEach((img) => {
+        activities.push({
+          type: "gallery",
+          content: `New image uploaded: ${img.title || "Untitled"}`,
+          time: getRelativeTime(new Date(img.created_at)),
+          timestamp: new Date(img.created_at),
+        });
+      });
+
+      // Sort by timestamp and take top 5
+      activities.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+      setRecentActivity(activities.slice(0, 5));
+
     } catch (error) {
-      console.error("Error fetching dashboard stats:", error);
+      console.error("Error fetching dashboard data:", error);
     } finally {
       setLoading(false);
     }
@@ -259,17 +343,35 @@ export default function AdminDashboard() {
                 <h2 className="text-lg font-bold text-foreground">Recent Activity</h2>
               </div>
               <div className="p-6">
-                <ul className="space-y-4">
-                  {recentActivity.map((activity, index) => (
-                    <li key={index} className="flex items-start gap-4">
-                      <div className="w-2 h-2 mt-2 rounded-full bg-primary-green" />
-                      <div className="flex-1">
-                        <p className="text-sm text-foreground">{activity.content}</p>
-                        <p className="text-xs text-muted-foreground mt-1">{activity.time}</p>
+                {loading ? (
+                  <div className="space-y-4">
+                    {Array.from({ length: 4 }).map((_, i) => (
+                      <div key={i} className="animate-pulse flex items-start gap-4">
+                        <div className="w-2 h-2 mt-2 rounded-full bg-gray-300" />
+                        <div className="flex-1 space-y-2">
+                          <div className="h-4 bg-gray-300 rounded w-3/4" />
+                          <div className="h-3 bg-gray-200 rounded w-1/4" />
+                        </div>
                       </div>
-                    </li>
-                  ))}
-                </ul>
+                    ))}
+                  </div>
+                ) : recentActivity.length === 0 ? (
+                  <p className="text-sm text-muted-foreground text-center py-8">
+                    No recent activity
+                  </p>
+                ) : (
+                  <ul className="space-y-4">
+                    {recentActivity.map((activity, index) => (
+                      <li key={index} className="flex items-start gap-4">
+                        <div className="w-2 h-2 mt-2 rounded-full bg-primary-green" />
+                        <div className="flex-1">
+                          <p className="text-sm text-foreground">{activity.content}</p>
+                          <p className="text-xs text-muted-foreground mt-1">{activity.time}</p>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
             </motion.div>
 
@@ -294,7 +396,7 @@ export default function AdminDashboard() {
                   <ChevronRight className="w-5 h-5 text-muted-foreground" />
                 </Link>
                 <Link
-                  href="/admin/gallery/upload"
+                  href="/admin/gallery/new"
                   className="flex items-center justify-between p-4 rounded-lg border border-border hover:bg-gray-50 transition-colors"
                 >
                   <div className="flex items-center gap-3">
