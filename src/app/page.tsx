@@ -1,41 +1,23 @@
 "use client";
 
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight, Milk, Sprout, GraduationCap, Award, Users, MapPin, TrendingUp, Play, ChevronRight } from "lucide-react";
-import { useEffect, useState, useRef } from "react";
-import { supabase } from "@/lib/supabase";
+import { ArrowRight, Milk, Sprout, GraduationCap, ChevronRight } from "lucide-react";
+import { Suspense, use } from "react";
+import dynamic from "next/dynamic";
 
-const heroImages = [
-  {
-    src: "/images/Homepage slider/Farm-drone image.jpg",
-    alt: "Prime Agro Farm drone view",
-  },
-  {
-    src: "/images/Homepage slider/Cattle Breeding.jpg",
-    alt: "Cattle breeding at Prime Agro Farm",
-  },
-  {
-    src: "/images/Homepage slider/Agro-Tourism.jpg",
-    alt: "Agro-tourism at Prime Agro Farm",
-  },
-  {
-    src: "/images/Homepage slider/Agro-Tourism-scaled.jpg",
-    alt: "Farm tourism facilities",
-  },
-  {
-    src: "/images/Homepage slider/Milk Production.jpg",
-    alt: "Milk production operations",
-  },
-];
+const HeroSection = dynamic(() => import("@/components/HeroSection"), {
+  loading: () => <div className="min-h-[90vh] gradient-green" />,
+});
 
-const stats = [
-  { icon: Milk, value: 500, suffix: "+", label: "Dairy Cattle" },
-  { icon: MapPin, value: 250, suffix: "", label: "Acres of Land" },
-  { icon: TrendingUp, value: 13, suffix: "", label: "Years of Excellence" },
-  { icon: Users, value: 50, suffix: "+", label: "Employees" },
-];
+const StatsSection = dynamic(() => import("@/components/StatsSection"), {
+  loading: () => <div className="section-padding bg-background" />,
+});
+
+const NewsSection = dynamic(() => import("@/components/NewsSection"), {
+  loading: () => <div className="section-padding bg-secondary" />,
+});
 
 const services = [
   {
@@ -61,310 +43,22 @@ const services = [
   },
 ];
 
-interface NewsItem {
-  id: string;
-  title: string;
-  slug: string;
-  excerpt: string;
-  image_url: string;
-  published_date: string;
-}
-
-function CountUp({ end, duration = 2000 }: { end: number; duration?: number }) {
-  const [count, setCount] = useState(0);
-  const countRef = useRef<HTMLSpanElement>(null);
-  const [hasAnimated, setHasAnimated] = useState(false);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && !hasAnimated) {
-          setHasAnimated(true);
-          let startTime: number;
-          const animate = (timestamp: number) => {
-            if (!startTime) startTime = timestamp;
-            const progress = Math.min((timestamp - startTime) / duration, 1);
-            setCount(Math.floor(progress * end));
-            if (progress < 1) {
-              requestAnimationFrame(animate);
-            }
-          };
-          requestAnimationFrame(animate);
-        }
-      },
-      { threshold: 0.5 }
-    );
-
-    if (countRef.current) {
-      observer.observe(countRef.current);
-    }
-
-    return () => observer.disconnect();
-  }, [end, duration, hasAnimated]);
-
-  return <span ref={countRef}>{count}</span>;
-}
-
-function TypeWriter({ text }: { text: string }) {
-  const [displayText, setDisplayText] = useState("");
-  const [currentIndex, setCurrentIndex] = useState(0);
-
-  useEffect(() => {
-    if (currentIndex < text.length) {
-      const timeout = setTimeout(() => {
-        setDisplayText((prev) => prev + text[currentIndex]);
-        setCurrentIndex((prev) => prev + 1);
-      }, 80);
-      return () => clearTimeout(timeout);
-    }
-  }, [currentIndex, text]);
-
-  return <>{displayText}</>;
-}
-
-function CardThrowCarousel() {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [progress, setProgress] = useState(0);
-  const DURATION = 5000;
-
-  useEffect(() => {
-    const startTime = Date.now();
-    
-    const progressInterval = setInterval(() => {
-      const elapsed = Date.now() - startTime;
-      const currentProgress = Math.min((elapsed / DURATION) * 100, 100);
-      setProgress(currentProgress);
-    }, 16);
-
-    const slideTimer = setTimeout(() => {
-      setCurrentIndex((prev) => (prev + 1) % heroImages.length);
-    }, DURATION);
-
-    return () => {
-      clearInterval(progressInterval);
-      clearTimeout(slideTimer);
-    };
-  }, [currentIndex]);
-
-  return (
-    <div className="relative aspect-[4/3] rounded-2xl overflow-hidden">
-      <AnimatePresence mode="popLayout">
-        {heroImages.map((image, index) => {
-          const isActive = index === currentIndex;
-          const isPrev = index === (currentIndex - 1 + heroImages.length) % heroImages.length;
-          
-          if (!isActive && !isPrev) return null;
-
-          return (
-            <motion.div
-              key={index}
-              initial={isActive ? { 
-                x: 100, 
-                y: -100, 
-                rotate: 15, 
-                scale: 0.8, 
-                opacity: 0,
-                zIndex: 20 
-              } : false}
-              animate={isActive ? { 
-                x: 0, 
-                y: 0, 
-                rotate: 0, 
-                scale: 1, 
-                opacity: 1,
-                zIndex: 20 
-              } : {
-                x: -50,
-                y: 50,
-                rotate: -8,
-                scale: 0.9,
-                opacity: 0.3,
-                zIndex: 10
-              }}
-              exit={{ 
-                x: -100, 
-                y: 100, 
-                rotate: -15, 
-                scale: 0.8, 
-                opacity: 0,
-                zIndex: 5
-              }}
-              transition={{ 
-                duration: 0.7, 
-                ease: [0.32, 0.72, 0, 1] 
-              }}
-              className="absolute inset-0"
-            >
-              <div className="relative w-full h-full rounded-2xl overflow-hidden shadow-2xl">
-                <Image
-                  src={image.src}
-                  alt={image.alt}
-                  fill
-                  className="object-cover"
-                  priority={index === 0}
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
-              </div>
-            </motion.div>
-          );
-        })}
-      </AnimatePresence>
-
-      <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/20 z-30">
-        <motion.div
-          className="h-full bg-gradient-to-r from-mint-green to-accent-green"
-          style={{ width: `${progress}%` }}
-          transition={{ duration: 0.016 }}
-        />
-      </div>
-    </div>
-  );
+async function getNews() {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/news?limit=3`, { 
+    cache: 'no-store',
+    next: { revalidate: 3600 }
+  });
+  if (!res.ok) return [];
+  return res.json();
 }
 
 export default function HomePage() {
-  const [news, setNews] = useState<NewsItem[]>([]);
-  const [newsLoading, setNewsLoading] = useState(true);
-
-  useEffect(() => {
-    fetchNews();
-  }, []);
-
-  const fetchNews = async () => {
-    try {
-      const { data, error } = await supabase
-        .from("news")
-        .select("id, title, slug, excerpt, image_url, published_date")
-        .order("published_date", { ascending: false })
-        .limit(3);
-
-      if (error) throw error;
-      setNews(data || []);
-    } catch (error) {
-      console.error("Error fetching news:", error);
-    } finally {
-      setNewsLoading(false);
-    }
-  };
+  const newsPromise = getNews();
 
   return (
     <>
-      <section className="relative min-h-[90vh] gradient-green text-white overflow-hidden">
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute inset-0" style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-          }} />
-        </div>
-
-        <div className="container-custom relative z-10 py-20 lg:py-32">
-          <div className="grid lg:grid-cols-2 gap-12 items-center min-h-[70vh]">
-            <motion.div
-              initial={{ opacity: 0, x: -50 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8 }}
-              className="space-y-8"
-            >
-              <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full text-sm">
-                <Award className="w-4 h-4 text-gold-accent" />
-                Uganda&apos;s Best Farmer 2025
-              </div>
-
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">
-                <TypeWriter text="Welcome to Prime Agro Farm" />
-              </h1>
-
-              <p className="text-lg md:text-xl text-white/90 leading-relaxed max-w-xl">
-                Uganda&apos;s leading integrated dairy company, representing a significant investment of over 1 billion UGX in modern agricultural innovation and sustainable farming practices in East Africa.
-              </p>
-
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Link href="/about" className="btn-primary bg-white text-primary-green hover:bg-mint-green group">
-                  Learn More
-                  <ArrowRight className="w-5 h-5 ml-2 transition-transform group-hover:translate-x-1" />
-                </Link>
-                <Link href="/contact" className="btn-secondary group">
-                  Contact Us
-                  <span className="inline-block transition-transform group-hover:scale-110"></span>
-                </Link>
-              </div>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, x: 50 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-              className="relative"
-            >
-              <CardThrowCarousel />
-
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.6 }}
-                className="absolute -bottom-6 -left-6 bg-white rounded-xl p-4 shadow-xl z-40"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-primary-green/10 flex items-center justify-center">
-                    <Milk className="w-6 h-6 text-primary-green" />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold text-primary-green">500+</p>
-                    <p className="text-sm text-muted-foreground">Dairy Cattle</p>
-                  </div>
-                </div>
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.8 }}
-                className="absolute -top-6 -right-6 bg-white rounded-xl p-4 shadow-xl z-40"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-accent-green/10 flex items-center justify-center">
-                    <MapPin className="w-6 h-6 text-accent-green" />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold text-accent-green">250</p>
-                    <p className="text-sm text-muted-foreground">Acres</p>
-                  </div>
-                </div>
-              </motion.div>
-            </motion.div>
-          </div>
-        </div>
-
-        <div className="absolute bottom-0 left-0 right-0">
-          <svg viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M0 120L60 105C120 90 240 60 360 45C480 30 600 30 720 37.5C840 45 960 60 1080 67.5C1200 75 1320 75 1380 75L1440 75V120H1380C1320 120 1200 120 1080 120C960 120 840 120 720 120C600 120 480 120 360 120C240 120 120 120 60 120H0Z" fill="#fafdf8"/>
-          </svg>
-        </div>
-      </section>
-
-      <section className="section-padding bg-background">
-        <div className="container-custom">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
-            {stats.map((stat, index) => (
-              <motion.div
-                key={stat.label}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                className="text-center"
-              >
-                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-primary-green/10 flex items-center justify-center">
-                  <stat.icon className="w-8 h-8 text-primary-green" />
-                </div>
-                <p className="text-4xl md:text-5xl font-bold text-primary-green">
-                  <CountUp end={stat.value} />
-                  {stat.suffix}
-                </p>
-                <p className="text-muted-foreground mt-2">{stat.label}</p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
+      <HeroSection />
+      <StatsSection />
 
       <section className="section-padding bg-secondary">
         <div className="container-custom">
@@ -396,6 +90,7 @@ export default function HomePage() {
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
               className="absolute inset-0 w-full h-full"
+              loading="lazy"
             />
           </motion.div>
 
@@ -456,84 +151,9 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="section-padding bg-secondary">
-        <div className="container-custom">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-12"
-          >
-            <div>
-              <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-2">
-                Latest News
-              </h2>
-              <p className="text-muted-foreground">Stay updated with our farm activities</p>
-            </div>
-            <Link href="/news" className="btn-outline">
-              View All News
-              <ArrowRight className="w-5 h-5 ml-2" />
-            </Link>
-          </motion.div>
-
-          {newsLoading ? (
-            <div className="text-center py-12">
-              <p className="text-muted-foreground">Loading news...</p>
-            </div>
-          ) : news.length === 0 ? (
-            <div className="text-center py-12">
-              <p className="text-muted-foreground">No news articles yet</p>
-            </div>
-          ) : (
-            <div className="grid md:grid-cols-3 gap-8">
-              {news.map((item, index) => (
-                <motion.article
-                  key={item.id}
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  whileHover={{ y: -8, transition: { duration: 0.3 } }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.1 }}
-                  className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300"
-                >
-                  <motion.div 
-                    className="relative aspect-[16/10] overflow-hidden"
-                    whileHover={{ scale: 1.05 }}
-                    transition={{ duration: 0.4 }}
-                  >
-                    <Image
-                      src={item.image_url}
-                      alt={item.title}
-                      fill
-                      className="object-cover"
-                    />
-                  </motion.div>
-                  <div className="p-6">
-                    <p className="text-sm text-muted-foreground mb-2">
-                      {new Date(item.published_date).toLocaleDateString("en-US", {
-                        month: "long",
-                        day: "numeric",
-                        year: "numeric",
-                      })}
-                    </p>
-                    <h3 className="text-lg font-bold text-foreground mb-2 line-clamp-2">
-                      {item.title}
-                    </h3>
-                    <p className="text-muted-foreground mb-4 line-clamp-2">{item.excerpt}</p>
-                    <Link
-                      href={`/news/${item.slug}`}
-                      className="inline-flex items-center text-primary-green font-semibold group"
-                    >
-                      Read More
-                      <ChevronRight className="w-5 h-5 ml-2 transition-transform group-hover:translate-x-1" />
-                    </Link>
-                  </div>
-                </motion.article>
-              ))}
-            </div>
-          )}
-        </div>
-      </section>
+      <Suspense fallback={<div className="section-padding bg-secondary" />}>
+        <NewsSection news={use(newsPromise)} />
+      </Suspense>
 
       <section className="section-padding gradient-green text-white">
         <div className="container-custom">
