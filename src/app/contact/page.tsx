@@ -78,12 +78,19 @@ export default function ContactPage() {
     try {
       // Send email via EmailJS first
       const emailParams = {
-        from_name: formData.name,
-        from_email: formData.email,
+        name: formData.name,
+        email: formData.email,
         phone: formData.phone || "Not provided",
         subject: formData.subject,
         message: formData.message,
-        to_email: "primeagrofarmslimited@gmail.com",
+        submitted_at: new Date().toLocaleString("en-US", {
+          month: "long",
+          day: "numeric",
+          year: "numeric",
+          hour: "numeric",
+          minute: "numeric",
+          hour12: true,
+        }),
       };
 
       await emailjs.send(
