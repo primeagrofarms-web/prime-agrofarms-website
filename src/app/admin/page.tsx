@@ -7,7 +7,7 @@ import { motion } from "framer-motion";
 import {
   LayoutDashboard,
   Newspaper,
-  Image,
+  Image as ImageIcon,
   MessageSquare,
   Users,
   Mail,
@@ -29,7 +29,7 @@ const sidebarItems = [
   { icon: LayoutDashboard, label: "Dashboard", href: "/admin", active: true },
   { icon: Newspaper, label: "News", href: "/admin/news" },
   { icon: BookOpen, label: "Blog", href: "/admin/blog" },
-  { icon: Image, label: "Gallery", href: "/admin/gallery" },
+  { icon: ImageIcon, label: "Gallery", href: "/admin/gallery" },
   { icon: MessageSquare, label: "Comments", href: "/admin/comments" },
   { icon: Mail, label: "Messages", href: "/admin/messages" },
   { icon: UserPlus, label: "Subscribers", href: "/admin/subscribers" },
@@ -48,7 +48,7 @@ export default function AdminDashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [stats, setStats] = useState([
     { label: "Total News", value: "0", change: "+0 this month", icon: Newspaper, color: "bg-blue-500" },
-    { label: "Gallery Images", value: "0", change: "+0 this month", icon: Image, color: "bg-green-500" },
+    { label: "Gallery Images", value: "0", change: "+0 this month", icon: ImageIcon, color: "bg-green-500" },
     { label: "Messages", value: "0", change: "0 unread", icon: Mail, color: "bg-orange-500" },
     { label: "Subscribers", value: "0", change: "+0 this month", icon: UserPlus, color: "bg-purple-500" },
   ]);
@@ -118,7 +118,7 @@ export default function AdminDashboard() {
           label: "Gallery Images",
           value: totalGallery.toString(),
           change: `+${galleryThisMonth} this month`,
-          icon: Image,
+          icon: ImageIcon,
           color: "bg-green-500",
         },
         {
@@ -402,7 +402,7 @@ export default function AdminDashboard() {
                   className="flex items-center justify-between p-4 rounded-lg border border-border hover:bg-gray-50 transition-colors"
                 >
                   <div className="flex items-center gap-3">
-                    <Image className="w-5 h-5 text-primary-green" />
+                    <ImageIcon className="w-5 h-5 text-primary-green" />
                     <span>Upload Images</span>
                   </div>
                   <ChevronRight className="w-5 h-5 text-muted-foreground" />
