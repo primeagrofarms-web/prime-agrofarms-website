@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { VisualEditsMessenger } from "orchids-visual-edits";
 import { SiteLayout } from "@/components/SiteLayout";
 import { defaultMetadata } from "@/lib/metadata";
 import { organizationSchema, localBusinessSchema } from "@/lib/structured-data";
@@ -26,7 +25,6 @@ export default function RootLayout({
       </head>
       <body className="antialiased">
         <SiteLayout>{children}</SiteLayout>
-        <VisualEditsMessenger />
       </body>
     </html>
   );
