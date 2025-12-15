@@ -8,10 +8,9 @@ import CTASection from "@/components/CTASection";
 
 async function getNews() {
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+    const baseUrl = 'http://localhost:3000';
     const res = await fetch(`${baseUrl}/api/news?limit=3`, { 
       cache: 'no-store',
-      next: { revalidate: 3600 }
     });
     if (!res.ok) return [];
     return res.json();
