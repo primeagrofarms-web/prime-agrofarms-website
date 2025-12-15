@@ -23,6 +23,8 @@ export default function AdminLoginPage() {
     setIsLoading(true);
     setError("");
 
+    console.log("Submitting login form...");
+
     try {
       const res = await fetch("/api/admin/login", {
         method: "POST",
@@ -30,14 +32,19 @@ export default function AdminLoginPage() {
         body: JSON.stringify(formData),
       });
 
+      console.log("Response status:", res.status);
       const data = await res.json();
+      console.log("Response data:", data);
 
       if (!res.ok) {
         throw new Error(data.error || "Login failed");
       }
 
+      console.log("Login successful, redirecting...");
       router.push("/admin");
+      router.refresh();
     } catch (err) {
+      console.error("Login error:", err);
       setError(err instanceof Error ? err.message : "Login failed");
     } finally {
       setIsLoading(false);
@@ -82,6 +89,7 @@ export default function AdminLoginPage() {
                   placeholder="admin@prime-agrofarms.com"
                   className="pl-10"
                   required
+                  disabled={isLoading}
                 />
               </div>
             </div>
@@ -98,11 +106,13 @@ export default function AdminLoginPage() {
                   placeholder="Enter your password"
                   className="pl-10 pr-10"
                   required
+                  disabled={isLoading}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  disabled={isLoading}
                 >
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
