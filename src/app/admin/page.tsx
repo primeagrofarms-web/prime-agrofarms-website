@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { motion } from "framer-motion";
 import {
   LayoutDashboard,
@@ -219,13 +220,14 @@ export default function AdminDashboard() {
       >
         <div className="flex flex-col h-full">
           <div className="p-6 border-b border-sidebar-border">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
-                <span className="text-white font-bold">PA</span>
-              </div>
-              <div>
-                <h2 className="font-bold">Prime Agro Farm</h2>
-                <p className="text-xs text-sidebar-foreground/70">Admin Panel</p>
+            <div className="flex items-center justify-center">
+              <div className="relative w-32 h-16">
+                <Image
+                  src="/images/logo/Prime LOGO.png"
+                  alt="Prime Agro Farm Logo"
+                  fill
+                  className="object-contain brightness-0 invert"
+                />
               </div>
             </div>
           </div>
