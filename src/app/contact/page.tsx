@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { MapPin, Phone, Mail, Clock, Send, ChevronRight, CheckCircle, MessageCircle, Users, BookOpen } from "lucide-react";
@@ -10,7 +10,6 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { initEmailJS, sendContactEmail } from "@/lib/emailjs";
 
 const contactInfo = [
   {
@@ -70,18 +69,24 @@ export default function ContactPage() {
     newsletter: false,
   });
 
-  useEffect(() => {
-    initEmailJS();
-  }, []);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     setError("");
     
-    const result = await sendContactEmail(formData);
-    
-    if (result.success) {
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || "Failed to send message");
+      }
+
       if (formData.newsletter) {
         await fetch('/api/newsletter', {
           method: 'POST',
@@ -100,7 +105,8 @@ export default function ContactPage() {
         message: "",
         newsletter: false,
       });
-    } else {
+    } catch (error) {
+      console.error('Contact form error:', error);
       setIsSubmitting(false);
       setError("Failed to send message. Please try again or contact us directly.");
     }
