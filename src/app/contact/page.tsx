@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import emailjs from "@emailjs/browser";
 import { MapPin, Phone, Mail, Clock, Send, ChevronRight, CheckCircle, MessageCircle, Users, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -75,6 +76,24 @@ export default function ContactPage() {
     setError("");
     
     try {
+      // Send email via EmailJS first
+      const emailParams = {
+        from_name: formData.name,
+        from_email: formData.email,
+        phone: formData.phone || "Not provided",
+        subject: formData.subject,
+        message: formData.message,
+        to_email: "primeagrofarmslimited@gmail.com",
+      };
+
+      await emailjs.send(
+        process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID!,
+        process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID!,
+        emailParams,
+        process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY!
+      );
+
+      // Then save to database
       const response = await fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -84,7 +103,7 @@ export default function ContactPage() {
       const result = await response.json();
 
       if (!response.ok || !result.success) {
-        throw new Error(result.error || "Failed to send message");
+        throw new Error(result.error || "Failed to save message");
       }
 
       if (formData.newsletter) {
