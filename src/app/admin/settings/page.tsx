@@ -77,6 +77,7 @@ export default function SettingsPage() {
       const res = await fetch("/api/admin/update-credentials", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify(formData),
       });
 
