@@ -39,20 +39,22 @@ export function Header() {
 
   return (
     <>
-      <div className="bg-primary-green text-white py-2 text-sm hidden md:block">
-        <div className="container-custom flex justify-between items-center">
-          <div className="flex items-center gap-6">
-            <a href="tel:+256701945174" className="flex items-center gap-2 hover:text-mint-green transition-colors">
-              <Phone className="w-4 h-4" />
-              +256 701 945 174
-            </a>
-            <a href="mailto:primeagrofarmslimited@gmail.com?subject=Inquiry%20from%20Website&body=Hello%20Prime%20Agro%20Farm%2C%0A%0AI%20would%20like%20to%20inquire%20about%20your%20services.%0A%0AThank%20you." className="flex items-center gap-2 hover:text-mint-green transition-colors">
-              <Mail className="w-4 h-4" />
-              primeagrofarmslimited@gmail.com
-            </a>
-          </div>
-          <div className="flex items-center gap-4">
-            <span>Zirobwe, Luweero District, Uganda</span>
+      <div className="bg-primary-green text-white py-2 text-sm">
+        <div className="container-custom">
+          <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-2 md:gap-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-6">
+              <a href="tel:+256701945174" className="flex items-center gap-2 hover:text-mint-green transition-colors">
+                <Phone className="w-4 h-4" />
+                <span className="text-xs sm:text-sm">+256 701 945 174</span>
+              </a>
+              <a href="mailto:primeagrofarmslimited@gmail.com?subject=Inquiry%20from%20Website&body=Hello%20Prime%20Agro%20Farm%2C%0A%0AI%20would%20like%20to%20inquire%20about%20your%20services.%0A%0AThank%20you." className="flex items-center gap-2 hover:text-mint-green transition-colors">
+                <Mail className="w-4 h-4" />
+                <span className="text-xs sm:text-sm truncate">primeagrofarmslimited@gmail.com</span>
+              </a>
+            </div>
+            <div className="flex items-center gap-4">
+              <span className="text-xs sm:text-sm">Zirobwe, Luweero District, Uganda</span>
+            </div>
           </div>
         </div>
       </div>

@@ -32,6 +32,10 @@ export const defaultMetadata: Metadata = {
     address: false,
     telephone: false,
   },
+  icons: {
+    icon: '/images/logo/Prime LOGO.png',
+    apple: '/images/logo/Prime LOGO.png',
+  },
   openGraph: {
     type: 'website',
     locale: 'en_UG',
