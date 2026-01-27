@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { Milk, Sprout, GraduationCap, ChevronRight } from "lucide-react";
+import { Milk, Sprout, GraduationCap, ChevronRight, Heart } from "lucide-react";
 
 const services = [
   {
@@ -26,6 +26,13 @@ const services = [
     description: "Hands-on experience in modern farming techniques and agricultural business management.",
     link: "/services#training",
   },
+  {
+    id: "cattle-breeding",
+    icon: Heart,
+    title: "Cattle Breeding",
+    description: "Selective breeding programs focusing on superior genetics and livestock excellence for dairy and beef.",
+    link: "/services#cattle-breeding",
+  },
 ];
 
 export default function ServicesSection() {
@@ -46,7 +53,7 @@ export default function ServicesSection() {
           </p>
         </motion.div>
 
-        <div className="grid md:grid-cols-3 gap-8">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
           {services.map((service, index) => (
             <motion.div
               key={service.id}

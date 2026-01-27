@@ -12,11 +12,13 @@ const navLinks = [
   {
     href: "/services",
     label: "Services",
-    submenu: [
-      { href: "/services#dairy", label: "Dairy Farming" },
-      { href: "/services#silage", label: "Silage & Hay" },
-      { href: "/services#training", label: "Training Workshops" },
-    ],
+      submenu: [
+        { href: "/services#dairy", label: "Dairy Farming" },
+        { href: "/services#silage", label: "Silage & Hay" },
+        { href: "/services#training", label: "Training Workshops" },
+        { href: "/services#cattle-breeding", label: "Cattle Breeding" },
+        { href: "/services#agro-tourism", label: "Agro Tourism" },
+      ],
   },
   { href: "/gallery", label: "Gallery" },
   { href: "/news", label: "News" },

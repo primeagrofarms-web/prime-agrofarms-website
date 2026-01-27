@@ -10,7 +10,7 @@ export const defaultMetadata: Metadata = {
     default: `${SITE_NAME} - Uganda's Leading Integrated Dairy Company`,
     template: `%s | ${SITE_NAME}`,
   },
-  description: "Modern agricultural innovation and sustainable farming practices in East Africa. Dairy farming, silage production, and training workshops in Zirobwe, Luweero District, Uganda.",
+    description: "Modern agricultural innovation and sustainable farming practices in East Africa. Specializing in dairy farming, silage production, cattle breeding, and agricultural training in Zirobwe, Uganda.",
   keywords: [
     "Prime Agro Farm",
     "dairy farming Uganda",

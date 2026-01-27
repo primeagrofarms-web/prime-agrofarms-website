@@ -20,7 +20,8 @@ const services = [
   { href: "/services#dairy", label: "Dairy Farming" },
   { href: "/services#silage", label: "Silage Production" },
   { href: "/services#training", label: "Training Workshops" },
-  { href: "/services#consultation", label: "Farm Consultation" },
+  { href: "/services#cattle-breeding", label: "Cattle Breeding" },
+  { href: "/services#agro-tourism", label: "Agro Tourism" },
 ];
 
 const socialLinks = [
