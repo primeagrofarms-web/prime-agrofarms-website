@@ -5,17 +5,21 @@ import VideoTourSection from "@/components/VideoTourSection";
 import ServicesSection from "@/components/ServicesSection";
 import NewsSection from "@/components/NewsSection";
 import CTASection from "@/components/CTASection";
+import { supabase } from "@/lib/supabase";
 
 async function getNews() {
   try {
-    const baseUrl = process.env.VERCEL_URL 
-      ? `https://${process.env.VERCEL_URL}`
-      : 'http://localhost:3000';
-    const res = await fetch(`${baseUrl}/api/news?limit=3`, { 
-      cache: 'no-store',
-    });
-    if (!res.ok) return [];
-    return res.json();
+    const { data, error } = await supabase
+      .from('news')
+      .select('*')
+      .order('published_date', { ascending: false })
+      .limit(3);
+
+    if (error) {
+      console.error('Error fetching news:', error);
+      return [];
+    }
+    return data || [];
   } catch (error) {
     console.error('Failed to fetch news:', error);
     return [];
