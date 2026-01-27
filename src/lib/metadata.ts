@@ -26,17 +26,13 @@ export const defaultMetadata: Metadata = {
   ],
   authors: [{ name: SITE_NAME }],
   creator: SITE_NAME,
-  publisher: SITE_NAME,
-  formatDetection: {
-    email: false,
-    address: false,
-    telephone: false,
-  },
-  icons: {
-    icon: '/images/logo/prime-logo.png',
-    apple: '/images/logo/prime-logo.png',
-  },
-  openGraph: {
+    publisher: SITE_NAME,
+    formatDetection: {
+      email: false,
+      address: false,
+      telephone: false,
+    },
+    openGraph: {
     type: 'website',
     locale: 'en_UG',
     url: BASE_URL,
