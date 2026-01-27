@@ -26,6 +26,8 @@ async function getNews() {
   }
 }
 
+export const revalidate = 60; // Revalidate every minute
+
 export default async function HomePage() {
   const news = await getNews();
 
