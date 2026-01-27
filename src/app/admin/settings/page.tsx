@@ -110,7 +110,7 @@ export default function SettingsPage() {
             <div className="flex items-center justify-center">
               <div className="relative w-32 h-16">
                 <Image
-                  src="/images/logo/Prime LOGO.png"
+                  src="/images/logo/prime-logo.png"
                   alt="Prime Agro Farm Logo"
                   fill
                   className="object-contain brightness-0 invert"

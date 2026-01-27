@@ -73,7 +73,7 @@ export function Header() {
             <Link href="/" className="flex items-center gap-3">
               <div className="relative w-32 h-16">
                 <Image
-                  src="/images/logo/Prime LOGO.png"
+                  src="/images/logo/prime-logo.png"
                   alt="Prime Agro Farm Logo"
                   fill
                   className="object-contain"

@@ -67,7 +67,7 @@ export function Footer() {
             <div className="flex items-center gap-3">
               <div className="relative w-24 h-12">
                 <Image
-                  src="/images/logo/Prime LOGO.png"
+                  src="/images/logo/prime-logo.png"
                   alt="Prime Agro Farm Logo"
                   fill
                   className="object-contain brightness-0 invert"

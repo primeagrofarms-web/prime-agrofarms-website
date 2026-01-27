@@ -2,7 +2,7 @@ import { Metadata } from 'next';
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://prime-agrofarms.com';
 const SITE_NAME = 'Prime Agro Farm';
-const DEFAULT_IMAGE = `${BASE_URL}/images/logo/Prime LOGO.png`;
+const DEFAULT_IMAGE = `${BASE_URL}/images/logo/prime-logo.png`;
 
 export const defaultMetadata: Metadata = {
   metadataBase: new URL(BASE_URL),
@@ -33,8 +33,8 @@ export const defaultMetadata: Metadata = {
     telephone: false,
   },
   icons: {
-    icon: '/images/logo/Prime LOGO.png',
-    apple: '/images/logo/Prime LOGO.png',
+    icon: '/images/logo/prime-logo.png',
+    apple: '/images/logo/prime-logo.png',
   },
   openGraph: {
     type: 'website',

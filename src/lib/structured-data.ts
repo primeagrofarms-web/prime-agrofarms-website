@@ -6,7 +6,7 @@ export const organizationSchema = {
   name: 'Prime Agro Farm Limited',
   alternateName: ['Prime Agro Farm', 'Prime Agrofarms'],
   url: BASE_URL,
-  logo: `${BASE_URL}/images/logo/Prime LOGO.png`,
+  logo: `${BASE_URL}/images/logo/prime-logo.png`,
   description: "Uganda's leading integrated dairy company with modern agricultural innovation and sustainable farming practices in East Africa.",
   address: {
     '@type': 'PostalAddress',
@@ -58,7 +58,7 @@ export const localBusinessSchema = {
   '@type': 'LocalBusiness',
   '@id': `${BASE_URL}/#localbusiness`,
   name: 'Prime Agro Farm Limited',
-  image: `${BASE_URL}/images/logo/Prime LOGO.png`,
+  image: `${BASE_URL}/images/logo/prime-logo.png`,
   url: BASE_URL,
   telephone: '+256-700-000-000',
   priceRange: '$$',
@@ -125,7 +125,7 @@ export function generateArticleSchema({
       name: 'Prime Agro Farm Limited',
       logo: {
         '@type': 'ImageObject',
-        url: `${BASE_URL}/images/logo/Prime LOGO.png`,
+        url: `${BASE_URL}/images/logo/prime-logo.png`,
       },
     },
     mainEntityOfPage: {
@@ -165,7 +165,7 @@ export function generateServiceSchema({
     name,
     description,
     url,
-    image: image || `${BASE_URL}/images/logo/Prime LOGO.png`,
+    image: image || `${BASE_URL}/images/logo/prime-logo.png`,
     provider: {
       '@type': 'Organization',
       name: 'Prime Agro Farm Limited',
