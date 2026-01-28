@@ -8,6 +8,7 @@ Prime Agro Farm is a modern agricultural platform for a leading dairy and livest
 - **Backend/Database**: Supabase (Auth, Database, Storage)
 - **Email**: EmailJS (Contact forms), Resend (Transactional/Newsletters)
 - **Deployment**: Vercel
+- **Repository**: `https://github.com/primeagrofarms-web/prime-agrofarms-website.git`
 
 ## Architecture
 - `src/app`: Next.js App Router pages and API routes
