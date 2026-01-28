@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { ChevronRight, Calendar, Eye, Share2, Facebook, Twitter, Linkedin, Mail } from "lucide-react";
 import { notFound } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, use } from "react";
 import { supabase } from "@/lib/supabase";
 import ImageLightbox from "@/components/ImageLightbox";
 
@@ -25,21 +25,20 @@ interface Props {
 }
 
 export default function NewsArticlePage({ params }: Props) {
+  const { slug: resolvedSlug } = use(params);
   const [article, setArticle] = useState<NewsArticle | null>(null);
   const [relatedArticles, setRelatedArticles] = useState<NewsArticle[]>([]);
   const [loading, setLoading] = useState(true);
-  const [slug, setSlug] = useState<string>("");
   const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
 
   const galleryImages = article?.gallery_images || [];
   const allImages = article ? [article.image_url, ...galleryImages] : [];
 
   useEffect(() => {
-    params.then((resolvedParams) => {
-      setSlug(resolvedParams.slug);
-      fetchArticle(resolvedParams.slug);
-    });
-  }, [params]);
+    if (resolvedSlug) {
+      fetchArticle(resolvedSlug);
+    }
+  }, [resolvedSlug]);
 
   const fetchArticle = async (articleSlug: string) => {
     try {

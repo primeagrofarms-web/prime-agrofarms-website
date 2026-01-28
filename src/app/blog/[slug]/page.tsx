@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { ChevronRight, Calendar, User, Eye, Facebook, Twitter, Linkedin, Mail } from "lucide-react";
 import { notFound } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, use } from "react";
 import { supabase } from "@/lib/supabase";
 import ImageLightbox from "@/components/ImageLightbox";
 
@@ -26,21 +26,20 @@ interface Props {
 }
 
 export default function BlogPostPage({ params }: Props) {
+  const { slug: resolvedSlug } = use(params);
   const [post, setPost] = useState<BlogPost | null>(null);
   const [relatedPosts, setRelatedPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
-  const [slug, setSlug] = useState<string>("");
   const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
 
   const galleryImages = post?.gallery_images || [];
   const allImages = post ? [post.image_url, ...galleryImages] : [];
 
   useEffect(() => {
-    params.then((resolvedParams) => {
-      setSlug(resolvedParams.slug);
-      fetchPost(resolvedParams.slug);
-    });
-  }, [params]);
+    if (resolvedSlug) {
+      fetchPost(resolvedSlug);
+    }
+  }, [resolvedSlug]);
 
   const fetchPost = async (postSlug: string) => {
     try {
