@@ -30,7 +30,7 @@ const services = [
     id: "cattle-breeding",
     icon: Heart,
     title: "Cattle Breeding",
-    description: "Selective breeding programs focusing on superior genetics and livestock excellence for dairy and beef.",
+    description: "Premium selective breeding programs focusing on superior genetics and livestock excellence for both dairy and beef production.",
     link: "/services#cattle-breeding",
   },
 ];
