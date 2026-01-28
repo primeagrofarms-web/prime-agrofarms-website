@@ -28,11 +28,11 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const formData = await request.json();
-    const { title, slug, excerpt, content, published_date, image_url } = formData;
+    const { title, slug, excerpt, content, published_date, image_url, gallery_images } = formData;
 
     const { data: post, error } = await supabase
       .from('news')
-      .insert([{ title, slug, excerpt, content, published_date, image_url }])
+      .insert([{ title, slug, excerpt, content, published_date, image_url, gallery_images }])
       .select()
       .single();
 

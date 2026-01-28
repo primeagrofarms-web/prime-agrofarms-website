@@ -18,6 +18,8 @@ import {
   ArrowLeft,
   Upload,
   Save,
+  Plus,
+  Trash2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -39,6 +41,8 @@ export default function NewNewsPage() {
   const [loading, setLoading] = useState(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>("");
+  const [galleryFiles, setGalleryFiles] = useState<File[]>([]);
+  const [galleryPreviews, setGalleryPreviews] = useState<string[]>([]);
 
   const [formData, setFormData] = useState({
     title: "",
@@ -75,6 +79,39 @@ export default function NewNewsPage() {
     }
   };
 
+  const handleGalleryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    const maxSize = 5 * 1024 * 1024;
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+
+    const validFiles = files.filter(file => {
+      if (file.size > maxSize) {
+        alert(`File ${file.name} is too large. Max 5MB.`);
+        return false;
+      }
+      if (!allowedTypes.includes(file.type)) {
+        alert(`File ${file.name} has an invalid type.`);
+        return false;
+      }
+      return true;
+    });
+
+    setGalleryFiles(prev => [...prev, ...validFiles]);
+
+    validFiles.forEach(file => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setGalleryPreviews(prev => [...prev, reader.result as string]);
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const removeGalleryImage = (index: number) => {
+    setGalleryFiles(prev => prev.filter((_, i) => i !== index));
+    setGalleryPreviews(prev => prev.filter((_, i) => i !== index));
+  };
+
   const generateSlug = (title: string) => {
     return title
       .toLowerCase()
@@ -97,20 +134,20 @@ export default function NewNewsPage() {
 
     try {
       let imageUrl = "";
+      const galleryUrls: string[] = [];
 
-      // Upload image to Supabase Storage
+      // Upload main image
       if (imageFile) {
         const fileExt = imageFile.name.split(".").pop();
         const fileName = `${Date.now()}-${generateSlug(formData.title)}.${fileExt}`;
         const filePath = `${fileName}`;
 
-        const { data: uploadData, error: uploadError } = await supabase.storage
+        const { error: uploadError } = await supabase.storage
           .from("news-images")
           .upload(filePath, imageFile);
 
         if (uploadError) throw uploadError;
 
-        // Get public URL
         const { data } = supabase.storage
           .from("news-images")
           .getPublicUrl(filePath);
@@ -118,11 +155,34 @@ export default function NewNewsPage() {
         imageUrl = data.publicUrl;
       }
 
-      // Call API to create news and send emails
+      // Upload gallery images
+      for (const file of galleryFiles) {
+        const fileExt = file.name.split(".").pop();
+        const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+        const filePath = `gallery/${fileName}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from("news-images")
+          .upload(filePath, file);
+
+        if (uploadError) throw uploadError;
+
+        const { data } = supabase.storage
+          .from("news-images")
+          .getPublicUrl(filePath);
+
+        galleryUrls.push(data.publicUrl);
+      }
+
+      // Call API to create news
       const res = await fetch('/api/news', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...formData, image_url: imageUrl }),
+        body: JSON.stringify({ 
+          ...formData, 
+          image_url: imageUrl,
+          gallery_images: galleryUrls 
+        }),
       });
 
       if (!res.ok) throw new Error('Failed to create news');
@@ -275,52 +335,99 @@ export default function NewNewsPage() {
               />
             </div>
 
-            <div>
-              <label className="block text-sm font-semibold text-foreground mb-2">
-                Feature Image *
-              </label>
-              <div className="border-2 border-dashed border-border rounded-lg p-8 text-center">
-                {imagePreview ? (
-                  <div className="space-y-4">
-                    <img
-                      src={imagePreview}
-                      alt="Preview"
-                      className="max-h-64 mx-auto rounded-lg"
-                    />
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => {
-                        setImageFile(null);
-                        setImagePreview("");
-                      }}
-                    >
-                      Remove Image
-                    </Button>
-                  </div>
-                ) : (
-                  <div>
-                    <Upload className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-                    <input
-                      type="file"
-                      id="image-upload"
-                      accept="image/*"
-                      onChange={handleImageChange}
-                      className="hidden"
-                      required
-                    />
-                    <label htmlFor="image-upload">
-                      <Button type="button" variant="outline" asChild>
-                        <span>Choose Image</span>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-semibold text-foreground mb-2">
+                  Feature Image *
+                </label>
+                <div className="border-2 border-dashed border-border rounded-lg p-4 text-center">
+                  {imagePreview ? (
+                    <div className="space-y-4">
+                      <img
+                        src={imagePreview}
+                        alt="Preview"
+                        className="max-h-48 mx-auto rounded-lg"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setImageFile(null);
+                          setImagePreview("");
+                        }}
+                      >
+                        Remove Image
                       </Button>
-                    </label>
-                    <p className="text-sm text-muted-foreground mt-2">
-                      PNG, JPG or WEBP (max 5MB)
-                    </p>
-                  </div>
-                )}
+                    </div>
+                  ) : (
+                    <div className="py-4">
+                      <Upload className="w-8 h-8 mx-auto text-muted-foreground mb-2" />
+                      <input
+                        type="file"
+                        id="image-upload"
+                        accept="image/*"
+                        onChange={handleImageChange}
+                        className="hidden"
+                        required
+                      />
+                      <label htmlFor="image-upload">
+                        <Button type="button" variant="outline" size="sm" asChild>
+                          <span>Choose Image</span>
+                        </Button>
+                      </label>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-foreground mb-2">
+                  Additional Images (Gallery)
+                </label>
+                <div className="border-2 border-dashed border-border rounded-lg p-4 text-center h-full min-h-[160px] flex flex-col items-center justify-center">
+                  <input
+                    type="file"
+                    id="gallery-upload"
+                    accept="image/*"
+                    multiple
+                    onChange={handleGalleryChange}
+                    className="hidden"
+                  />
+                  <label htmlFor="gallery-upload">
+                    <Button type="button" variant="outline" size="sm" asChild>
+                      <span className="flex items-center gap-2">
+                        <Plus className="w-4 h-4" /> Add Gallery Images
+                      </span>
+                    </Button>
+                  </label>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Multiple images allowed
+                  </p>
+                </div>
               </div>
             </div>
+
+            {galleryPreviews.length > 0 && (
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mt-4">
+                {galleryPreviews.map((preview, index) => (
+                  <div key={index} className="relative group aspect-square rounded-lg overflow-hidden border border-border">
+                    <img
+                      src={preview}
+                      alt={`Gallery ${index}`}
+                      className="w-full h-full object-cover"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeGalleryImage(index)}
+                      className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
 
             <div>
               <label className="block text-sm font-semibold text-foreground mb-2">
