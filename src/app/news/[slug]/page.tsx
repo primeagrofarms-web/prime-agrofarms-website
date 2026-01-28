@@ -7,6 +7,7 @@ import { ChevronRight, Calendar, Eye, Share2, Facebook, Twitter, Linkedin, Mail 
 import { notFound } from "next/navigation";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import ImageLightbox from "@/components/ImageLightbox";
 
 interface NewsArticle {
   id: string;
@@ -28,6 +29,10 @@ export default function NewsArticlePage({ params }: Props) {
   const [relatedArticles, setRelatedArticles] = useState<NewsArticle[]>([]);
   const [loading, setLoading] = useState(true);
   const [slug, setSlug] = useState<string>("");
+  const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
+
+  const galleryImages = article?.gallery_images || [];
+  const allImages = article ? [article.image_url, ...galleryImages] : [];
 
   useEffect(() => {
     params.then((resolvedParams) => {
@@ -140,20 +145,21 @@ export default function NewsArticlePage({ params }: Props) {
       <section className="section-padding bg-background">
         <div className="container-custom">
           <div className="max-w-4xl mx-auto">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="relative aspect-[21/9] rounded-2xl overflow-hidden mb-12 shadow-2xl"
-            >
-              <Image
-                src={article.image_url}
-                alt={article.title}
-                fill
-                className="object-cover"
-                priority
-              />
-            </motion.div>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="relative aspect-[21/9] rounded-2xl overflow-hidden mb-12 shadow-2xl cursor-pointer"
+                onClick={() => setSelectedImageIndex(0)}
+              >
+                <Image
+                  src={article.image_url}
+                  alt={article.title}
+                  fill
+                  className="object-cover hover:scale-105 transition-transform duration-500"
+                  priority
+                />
+              </motion.div>
 
             <div className="grid lg:grid-cols-4 gap-12">
               <aside className="lg:col-span-1 space-y-6">
@@ -222,33 +228,34 @@ export default function NewsArticlePage({ params }: Props) {
                   </motion.div>
 
                   {article.gallery_images && article.gallery_images.length > 0 && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.35 }}
-                      className="mb-12"
-                    >
-                      <h2 className="text-2xl font-bold text-foreground mb-6">Gallery</h2>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        {article.gallery_images.map((url, index) => (
-                          <div 
-                            key={index} 
-                            className="relative aspect-video rounded-xl overflow-hidden group cursor-pointer shadow-md hover:shadow-xl transition-all duration-300"
-                          >
-                            <Image
-                              src={url}
-                              alt={`Gallery image ${index + 1}`}
-                              fill
-                              className="object-cover group-hover:scale-110 transition-transform duration-500"
-                            />
-                            <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors" />
-                          </div>
-                        ))}
-                      </div>
-                    </motion.div>
-                  )}
+                      <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.35 }}
+                        className="mb-12"
+                      >
+                        <h2 className="text-2xl font-bold text-foreground mb-6">Gallery</h2>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          {article.gallery_images.map((url, index) => (
+                            <div 
+                              key={index} 
+                              className="relative aspect-video rounded-xl overflow-hidden group cursor-pointer shadow-md hover:shadow-xl transition-all duration-300"
+                              onClick={() => setSelectedImageIndex(index + 1)}
+                            >
+                              <Image
+                                src={url}
+                                alt={`Gallery image ${index + 1}`}
+                                fill
+                                className="object-cover group-hover:scale-110 transition-transform duration-500"
+                              />
+                              <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors" />
+                            </div>
+                          ))}
+                        </div>
+                      </motion.div>
+                    )}
 
-                {relatedArticles.length > 0 && (
+                  {relatedArticles.length > 0 && (
                   <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -287,32 +294,43 @@ export default function NewsArticlePage({ params }: Props) {
                   </motion.div>
                 )}
 
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.5 }}
-                  className="mt-12 bg-gradient-to-br from-primary-green to-accent-green rounded-2xl p-8 text-white"
-                >
-                  <h3 className="text-2xl font-bold mb-3">
-                    Stay Updated with Our Latest News
-                  </h3>
-                  <p className="text-white/90 mb-6">
-                    Subscribe to our newsletter and never miss important updates from
-                    Prime Agro Farm.
-                  </p>
-                  <Link
-                    href="/news"
-                    className="inline-flex items-center btn-primary bg-white text-primary-green hover:bg-white/90 group"
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.5 }}
+                    className="mt-12 bg-gradient-to-br from-primary-green to-accent-green rounded-2xl p-8 text-white"
                   >
-                    View All News
-                    <ChevronRight className="w-5 h-5 ml-2 transition-transform group-hover:translate-x-1" />
-                  </Link>
-                </motion.div>
-              </article>
+                    <h3 className="text-2xl font-bold mb-3">
+                      Stay Updated with Our Latest News
+                    </h3>
+                    <p className="text-white/90 mb-6">
+                      Subscribe to our newsletter and never miss important updates from
+                      Prime Agro Farm.
+                    </p>
+                    <Link
+                      href="/news"
+                      className="inline-flex items-center btn-primary bg-white text-primary-green hover:bg-white/90 group"
+                    >
+                      View All News
+                      <ChevronRight className="w-5 h-5 ml-2 transition-transform group-hover:translate-x-1" />
+                    </Link>
+                  </motion.div>
+                </article>
+              </div>
             </div>
           </div>
-        </div>
-      </section>
-    </>
-  );
+        </section>
+
+        <ImageLightbox
+          images={allImages}
+          currentIndex={selectedImageIndex ?? 0}
+          isOpen={selectedImageIndex !== null}
+          onClose={() => setSelectedImageIndex(null)}
+          onPrev={() => setSelectedImageIndex((prev) => (prev !== null ? (prev - 1 + allImages.length) % allImages.length : null))}
+          onNext={() => setSelectedImageIndex((prev) => (prev !== null ? (prev + 1) % allImages.length : null))}
+          title={article.title}
+        />
+      </>
+    );
+  }
 }

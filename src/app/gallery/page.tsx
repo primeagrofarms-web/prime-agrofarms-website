@@ -7,6 +7,7 @@ import Image from "next/image";
 import { ChevronRight, X, ChevronLeft, ChevronRight as ChevronRightIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/lib/supabase";
+import ImageLightbox from "@/components/ImageLightbox";
 
 const categories = [
   { id: "all", label: "All Photos" },
@@ -161,69 +162,16 @@ export default function GalleryPage() {
         </div>
       </section>
 
-      <AnimatePresence>
-        {selectedImage && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4"
-            onClick={() => setSelectedImage(null)}
-          >
-            <button
-              className="absolute top-4 right-4 text-white/80 hover:text-white p-2 transition-colors"
-              onClick={() => setSelectedImage(null)}
-            >
-              <X className="w-8 h-8" />
-            </button>
-
-            {currentIndex > 0 && (
-              <button
-                className="absolute left-4 text-white/80 hover:text-white p-2 transition-colors"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handlePrevious();
-                }}
-              >
-                <ChevronLeft className="w-8 h-8" />
-              </button>
-            )}
-
-            {currentIndex < filteredImages.length - 1 && (
-              <button
-                className="absolute right-4 text-white/80 hover:text-white p-2 transition-colors"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleNext();
-                }}
-              >
-                <ChevronRightIcon className="w-8 h-8" />
-              </button>
-            )}
-
-            <motion.div
-              initial={{ scale: 0.9 }}
-              animate={{ scale: 1 }}
-              exit={{ scale: 0.9 }}
-              className="relative max-w-5xl max-h-[90vh] w-full"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <Image
-                src={selectedImage.image_url}
-                alt={selectedImage.title}
-                width={1200}
-                height={800}
-                className="w-full h-auto max-h-[80vh] object-contain rounded-lg"
-              />
-              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-6 rounded-b-lg">
-                <h3 className="text-white text-xl font-bold mb-2">{selectedImage.title}</h3>
-                <p className="text-white/80 mb-3">{selectedImage.description}</p>
-                <span className="capitalize text-white/60 text-sm">{selectedImage.category}</span>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <ImageLightbox
+        images={filteredImages.map((img) => img.image_url)}
+        currentIndex={currentIndex}
+        isOpen={!!selectedImage}
+        onClose={() => setSelectedImage(null)}
+        onPrev={handlePrevious}
+        onNext={handleNext}
+        title={selectedImage?.title}
+        description={selectedImage?.description}
+      />
     </>
   );
 }
