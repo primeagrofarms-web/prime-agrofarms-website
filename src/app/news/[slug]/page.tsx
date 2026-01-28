@@ -15,6 +15,7 @@ interface NewsArticle {
   excerpt: string;
   content: string;
   image_url: string;
+  gallery_images?: string[];
   published_date: string;
 }
 
@@ -211,14 +212,41 @@ export default function NewsArticlePage({ params }: Props) {
               </aside>
 
               <article className="lg:col-span-3">
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.3 }}
-                  className="prose prose-lg max-w-none whitespace-pre-line"
-                >
-                  {article.content}
-                </motion.div>
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3 }}
+                    className="prose prose-lg max-w-none whitespace-pre-line mb-12"
+                  >
+                    {article.content}
+                  </motion.div>
+
+                  {article.gallery_images && article.gallery_images.length > 0 && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.35 }}
+                      className="mb-12"
+                    >
+                      <h2 className="text-2xl font-bold text-foreground mb-6">Gallery</h2>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {article.gallery_images.map((url, index) => (
+                          <div 
+                            key={index} 
+                            className="relative aspect-video rounded-xl overflow-hidden group cursor-pointer shadow-md hover:shadow-xl transition-all duration-300"
+                          >
+                            <Image
+                              src={url}
+                              alt={`Gallery image ${index + 1}`}
+                              fill
+                              className="object-cover group-hover:scale-110 transition-transform duration-500"
+                            />
+                            <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors" />
+                          </div>
+                        ))}
+                      </div>
+                    </motion.div>
+                  )}
 
                 {relatedArticles.length > 0 && (
                   <motion.div
